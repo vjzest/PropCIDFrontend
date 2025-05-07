@@ -1,0 +1,194 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+
+    --primary: 142 70% 49%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 142 70% 49%;
+
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 142 70% 49%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 142 70% 49%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  
+  body {
+    @apply bg-background text-foreground font-sans;
+    font-family: 'Inter', sans-serif;
+  }
+  
+  /* Custom scrollbar for the main content */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: #f1f1f1;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: #4CAF50;
+    border-radius: 4px;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: #3e9142;
+  }
+}
+
+@layer components {
+  .reels-container {
+    scroll-snap-type: y mandatory;
+    overflow-y: scroll;
+    height: 100%;
+    background-color: #000; /* Video section background now black */
+  }
+  
+  .reel-item {
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+    height: 100%;
+  }
+  
+  .story-scroll {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .story-scroll::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .property-card {
+    @apply bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300;
+  }
+  
+  .section-title {
+    @apply text-2xl md:text-3xl font-bold mb-6 text-neutral-900 after:content-[''] after:block after:w-24 after:h-1 after:bg-primary after:mt-2;
+  }
+
+  /* Dropdown styling improvement */
+  .dropdown-menu-content {
+    @apply z-50 bg-white border border-gray-200 shadow-lg rounded-md overflow-hidden;
+  }
+  
+  /* Mobile navbar improvements */
+  .mobile-menu {
+    @apply animate-in slide-in-from-top duration-300;
+  }
+  
+  /* Dropdown menu hover improvements */
+  .dropdown-item {
+    @apply transition-colors duration-150;
+  }
+  
+  /* Admin dashboard card hover */
+  .admin-card {
+    @apply transition-all duration-200 hover:translate-y-[-5px] hover:shadow-lg;
+  }
+
+  /* Enhanced dropdown hover states */
+  .nav-dropdown-item {
+    @apply block w-full px-4 py-2 text-sm text-gray-700 hover:bg-primary hover:text-white rounded transition-colors duration-150;
+  }
+  
+  /* Video section full height */
+  .video-section-full {
+    @apply h-screen sticky top-0 bg-black;
+  }
+  
+  /* Left content container */
+  .left-content {
+    @apply w-full lg:w-[70%];
+  }
+}
+
+/* Fix navbar dropdown z-index issues */
+.NavigationMenuContent {
+  z-index: 50 !important;
+  background-color: white !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Improve dropdown hover states */
+.NavigationMenuContent a:hover {
+  background-color: var(--primary) !important;
+  color: white !important;
+}
+
+/* Ensure proper dropdown positioning */
+.NavigationMenuViewport {
+  width: var(--radix-navigation-menu-viewport-width) !important;
+  height: var(--radix-navigation-menu-viewport-height) !important;
+}
+
+/* Enhanced mobile menu styling */
+.mobile-nav-item {
+  @apply flex items-center px-3 py-2 rounded-md text-base font-medium text-gray-900 hover:bg-primary/10 hover:text-primary transition-colors;
+}
+
+.mobile-nav-subitem {
+  @apply flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-primary/10 hover:text-primary pl-6 transition-colors;
+}
