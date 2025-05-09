@@ -21,7 +21,7 @@ import { Label } from "./ui/label";
 // Import Firebase authentication methods from your firebase.tsx file
 import { auth, signInWithEmailAndPassword } from "@/components/firebase.tsx";
 
-const BASE_URL = "https://propcidback.onrender.com";
+const BASE_URL = "http://localhost:4000";
 
 // Custom hook for authentication
 const useAuth = () => {
@@ -537,17 +537,6 @@ const Navbar = () => {
     scrollToTop();
   };
 
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [showAddStoryPrompt, setShowAddStoryPrompt] = useState(false);
-
-  const handleAddStoryClick = () => {
-    if (!isAuthenticated) {
-      setShowAddStoryPrompt(true);
-    } else {
-      navigate("/add-story");
-    }
-  };
-
   if (isAdminSection) {
     return null;
   }
@@ -765,16 +754,6 @@ const Navbar = () => {
               </div>
             )}
           </div>
-
-          {/* Add Story Button - Always visible */}
-          <Button
-            variant="outline"
-            className="hidden md:flex items-center gap-2 hover:bg-primary hover:text-white transition-colors"
-            onClick={handleAddStoryClick}
-          >
-            <Plus className="w-4 h-4" />
-            Add Story
-          </Button>
 
           {/* Mobile Menu Button */}
           <button
@@ -1034,37 +1013,6 @@ const Navbar = () => {
           </button>
         </div>
       </div>
-
-      {/* Add Story Login Prompt */}
-      <Dialog open={showAddStoryPrompt} onOpenChange={setShowAddStoryPrompt}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Login Required</DialogTitle>
-            <DialogDescription>
-              Please login to add your story.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex justify-end gap-4 mt-4">
-            <Button
-              variant="outline"
-              onClick={() => {
-                setShowAddStoryPrompt(false);
-                setAuthDialogOpen(true);
-              }}
-            >
-              Login Now
-            </Button>
-            <Button
-              onClick={() => {
-                setShowAddStoryPrompt(false);
-                setAuthDialogOpen(true);
-              }}
-            >
-              Sign Up
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
     </>
   );
 };
