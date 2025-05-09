@@ -1,3 +1,4 @@
+// Correct import for Firebase modular functions
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,15 +8,20 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { LogIn, LogOut, Menu, Search, UserPlus, X, Home, Video } from "lucide-react";
+import { LogIn, LogOut, Menu, Search, UserPlus, X, Home, Video, Plus } from "lucide-react";
 import logoImage from "../Logo.jpg";
 import axios from "axios";
+import { Label } from "./ui/label";
 
-const BASE_URL = "https://propcidback.onrender.com";
+// Import Firebase authentication methods from your firebase.tsx file
+import { auth, signInWithEmailAndPassword } from "@/components/firebase.tsx";
+
+const BASE_URL = "http://localhost:4000";
 
 // Custom hook for authentication
 const useAuth = () => {
@@ -29,39 +35,113 @@ const useAuth = () => {
     () => localStorage.getItem("userEmail") || ""
   );
 
-  const login = async (email: string, password: string) => {
+  // ✅ Corrected Login function (no export keyword inside hook)
+  const login = async (email: string, password: string): Promise<boolean> => {
     try {
-      const response = await axios.post(`${BASE_URL}/api/auth/login`, {
-        email,
-        password,
-      });
-      const { token, userType } = response.data;
+      // Step 1: Firebase login
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+      console.log("Backend login response:", user);
 
-      localStorage.setItem("token", token);
-      localStorage.setItem("authenticated", "true");
-      localStorage.setItem("userType", userType);
-      localStorage.setItem("userEmail", email);
-
-      setIsAuthenticated(true);
-      setUserType(userType);
-      setUserEmail(email);
-      return true;
+      if (user) {
+        // 🔥 Reload user to get updated emailVerified status
+        await user.reload();
+  
+        if (!user.emailVerified) {
+          console.error("Email not verified");
+          return false;
+        }
+  
+        //  Get fresh token with updated claims
+        const idToken = await user.getIdToken(true); // Force refresh token
+  
+        // Save token
+        localStorage.setItem("firebaseToken", idToken);
+  
+        // Step 2: Call your backend login
+        const response = await axios.post(`${BASE_URL}/api/auth/login`, {
+          email,
+           token: idToken,
+        });
+  
+        const { userType, user: userData } = response.data;
+  
+        // Save user info
+        localStorage.setItem("userEmail", userData.email);
+        localStorage.setItem("userType", userType);
+        localStorage.setItem("authenticated", "true");
+  
+        // Update React state
+        setIsAuthenticated(true);
+        setUserType(userType);
+        setUserEmail(userData.email);
+  
+        // Optional: Protected route call
+        const protectedResponse = await axios.get(`${BASE_URL}/api/auth/protected-route`, {
+          headers: {
+            Authorization: `Bearer ${idToken}`,
+          },
+        });
+        console.log("Protected data:", protectedResponse.data);
+  
+        return true;
+      } else {
+        console.error("No user found");
+        return false;
+      }
     } catch (error) {
+      console.error("Login failed:", error);
       return false;
     }
   };
+  
 
+  // Logout function
   const logout = () => {
     localStorage.removeItem("authenticated");
     localStorage.removeItem("userType");
     localStorage.removeItem("userEmail");
-    localStorage.removeItem("token");
+    localStorage.removeItem("firebaseToken");
     setIsAuthenticated(false);
     setUserType("");
     setUserEmail("");
   };
 
+  // ✅ Return everything
   return { isAuthenticated, userType, userEmail, login, logout };
+};
+
+// Email Verification Popup Component
+const EmailVerificationPopup = ({ email, onClose }: { email: string; onClose: () => void }) => {
+  const { toast } = useToast();
+  const navigate = useNavigate();
+
+  return (
+    <Dialog open={true} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle className="text-green-600 text-2xl font-bold">Signup Successful!</DialogTitle>
+          <DialogDescription className="text-gray-600 mt-2">
+            A verification link has been sent to {email}. Please check your email and click the link to verify your account.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            If you don't see the email, please check your spam folder.
+          </p>
+          <Button 
+            onClick={() => {
+              onClose();
+              navigate('/login');
+            }} 
+            className="w-full bg-primary hover:bg-primary/90"
+          >
+            Go to Login
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
 };
 
 // Login Form Component
@@ -135,6 +215,46 @@ const LoginForm = ({ onSuccess }: { onSuccess?: () => void }) => {
   );
 };
 
+// Success Message Component
+const SignupSuccessMessage = ({ email, onClose }: { email: string; onClose: () => void }) => {
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg p-8 max-w-md w-full mx-4 text-center">
+        <div className="mb-6">
+          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          <h3 className="text-2xl font-bold text-green-600 mb-2">Signup Successful!</h3>
+          <div className="space-y-3">
+            <p className="text-gray-700 font-medium">
+              Please verify your email address
+            </p>
+            <p className="text-gray-600">
+              We have sent a verification link to:
+              <br />
+              <span className="font-semibold text-primary">{email}</span>
+            </p>
+            <p className="text-sm text-gray-500">
+              Click the link in your email to verify your account and continue.
+            </p>
+            <p className="text-xs text-gray-400 mt-2">
+              Note: If you don't see the email, please check your spam folder.
+            </p>
+          </div>
+        </div>
+        <button
+          onClick={onClose}
+          className="w-full bg-primary hover:bg-primary/90 text-white font-medium py-2 px-4 rounded-md transition-colors"
+        >
+          Go to Login
+        </button>
+      </div>
+    </div>
+  );
+};
+
 // Signup Form Component
 const SignupForm = ({
   type,
@@ -154,13 +274,14 @@ const SignupForm = ({
   const [companyName, setCompanyName] = useState("");
   const [licenseNumber, setLicenseNumber] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-
+  
     try {
       if (!name || !email || !password || !confirmPassword) {
         toast({
@@ -170,7 +291,7 @@ const SignupForm = ({
         });
         return;
       }
-
+  
       if (password !== confirmPassword) {
         toast({
           title: "Error",
@@ -179,7 +300,7 @@ const SignupForm = ({
         });
         return;
       }
-
+  
       const payload = {
         name,
         email,
@@ -188,32 +309,40 @@ const SignupForm = ({
         ...(type === "builder" && { companyName }),
         ...(type === "broker" && { licenseNumber }),
       };
-
+  
       const response = await axios.post(`${BASE_URL}/api/auth/signup`, payload);
-
+  
       if (response.data.success) {
-        // Close signup dialog first
-        setIsSignupDialogOpen(false);
-
-        // Show success message
+        // ✅ Show success message
         toast({
-          title: "Success",
-          description: "Signup successful! Please login to continue.",
-          duration: 2000,
+          description: "Please verify your email — verification link sent to your inbox.",
+           className: "bg-black text-white"
         });
-
-        // Open login dialog after a short delay
-        setTimeout(() => {
-          setAuthDialogOpen(true);
-        }, 1000);
+  
+        // Close signup dialog
+        setIsSignupDialogOpen(false);
+        setShowSuccess(true);
       }
     } catch (error: any) {
-      // Don't show error toast, just close the dialog
-      setIsSignupDialogOpen(false);
+      toast({
+        title: "Error",
+        description: error.response?.data?.error || "Failed to create account",
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }
   };
+  
+
+  const handleSuccessClose = () => {
+    setShowSuccess(false);
+    navigate('/login');
+  };
+
+  if (showSuccess) {
+    return <SignupSuccessMessage email={email} onClose={handleSuccessClose} />;
+  }
 
   return (
     <div className="bg-white rounded-lg p-4 shadow-lg max-h-[80vh] overflow-y-auto">
@@ -335,6 +464,51 @@ const SignupForm = ({
   );
 };
 
+// Add Story Login Prompt Component
+const AddStoryLoginPrompt = ({ onClose }: { onClose: () => void }) => {
+  const { toast } = useToast();
+  const navigate = useNavigate();
+
+  return (
+    <Dialog open={true} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle className="text-xl font-semibold">Login Required</DialogTitle>
+          <DialogDescription className="text-gray-600">
+            Please login to add your story
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-4">
+          <p className="text-sm text-gray-500">
+            You need to be logged in to share your story with the community.
+          </p>
+          <div className="flex space-x-3">
+            <Button
+              onClick={() => {
+                onClose();
+                navigate('/login');
+              }}
+              className="flex-1 bg-primary hover:bg-primary/90"
+            >
+              Login Now
+            </Button>
+            <Button
+              onClick={() => {
+                onClose();
+                navigate('/signup');
+              }}
+              variant="outline"
+              className="flex-1"
+            >
+              Sign Up
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
 const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
@@ -363,6 +537,17 @@ const Navbar = () => {
     scrollToTop();
   };
 
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [showAddStoryPrompt, setShowAddStoryPrompt] = useState(false);
+
+  const handleAddStoryClick = () => {
+    if (!isAuthenticated) {
+      setShowAddStoryPrompt(true);
+    } else {
+      navigate("/add-story");
+    }
+  };
+
   if (isAdminSection) {
     return null;
   }
@@ -373,10 +558,12 @@ const Navbar = () => {
         <div className="container mx-auto flex items-center justify-between">
           {/* Logo */}
           <Link to="/" className="flex items-center" onClick={scrollToTop}>
-            <div className="flex items-center">
+            <div className="flex items-center relative">
               <span className="text-2xl font-bold">PROP</span>
-              <span className="text-2xl font-bold text-red-500">CID</span>
-              <div className="w-1.5 h-1.5 bg-yellow-400 rounded-full ml-0.5 mt-0.5"></div>
+              <span className="text-2xl font-bold text-red-500 relative">
+                CID
+                <div className="absolute -top-1 left-1/2 transform -translate-x-1/2 w-1.5 h-1.5 bg-yellow-400 rounded-full"></div>
+              </span>
             </div>
           </Link>
 
@@ -420,7 +607,7 @@ const Navbar = () => {
             </Link>
             <div className="relative group">
               <button
-                className="text-gray-700 hover:text-primary flex items-center gap-1"
+                className="text-gray-700 hover:text-primary flex items-center gap-1 px-3 py-2"
                 onClick={scrollToTop}
               >
                 Properties
@@ -558,18 +745,19 @@ const Navbar = () => {
               </>
             ) : (
               <div className="flex items-center space-x-4">
-                <Link
-                  to={`/${userType}`}
-                  className="text-sm text-gray-700 hover:text-primary"
-                  onClick={scrollToTop}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => navigate(`/${userType}`)}
+                  className="text-primary border-primary hover:bg-primary hover:text-white transition-colors duration-200"
                 >
                   <span className="font-medium capitalize">{userType}</span>
-                </Link>
+                </Button>
                 <Button
-                  variant="ghost"
+                  variant="outline"
                   size="sm"
                   onClick={handleLogout}
-                  className="text-gray-700 hover:text-primary hover:bg-primary/10 transition-colors duration-200"
+                  className="text-red-500 border-red-500 hover:bg-red-500 hover:text-white transition-colors duration-200"
                 >
                   <LogOut className="w-3 h-3 mr-1" />
                   <span className="text-sm">Logout</span>
@@ -577,6 +765,16 @@ const Navbar = () => {
               </div>
             )}
           </div>
+
+          {/* Add Story Button - Always visible */}
+          <Button
+            variant="outline"
+            className="hidden md:flex items-center gap-2 hover:bg-primary hover:text-white transition-colors"
+            onClick={handleAddStoryClick}
+          >
+            <Plus className="w-4 h-4" />
+            Add Story
+          </Button>
 
           {/* Mobile Menu Button */}
           <button
@@ -783,12 +981,13 @@ const Navbar = () => {
                     <span className="font-medium capitalize">{userType}</span>
                   </Link>
                   <Button
-                    variant="ghost"
-                    className="w-full text-gray-700 hover:text-primary hover:bg-primary/10 transition-colors duration-200"
+                    variant="outline"
+                    size="sm"
                     onClick={() => {
                       handleLogout();
                       setMobileMenuOpen(false);
                     }}
+                    className="text-red-500 border-red-500 hover:bg-red-500 hover:text-white transition-colors duration-200"
                   >
                     <LogOut className="w-4 h-4 mr-2" />
                     <span>Logout</span>
@@ -835,6 +1034,37 @@ const Navbar = () => {
           </button>
         </div>
       </div>
+
+      {/* Add Story Login Prompt */}
+      <Dialog open={showAddStoryPrompt} onOpenChange={setShowAddStoryPrompt}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Login Required</DialogTitle>
+            <DialogDescription>
+              Please login to add your story.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end gap-4 mt-4">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowAddStoryPrompt(false);
+                setAuthDialogOpen(true);
+              }}
+            >
+              Login Now
+            </Button>
+            <Button
+              onClick={() => {
+                setShowAddStoryPrompt(false);
+                setAuthDialogOpen(true);
+              }}
+            >
+              Sign Up
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };
