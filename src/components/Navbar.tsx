@@ -21,7 +21,7 @@ import { Label } from "./ui/label";
 // Import Firebase authentication methods from your firebase.tsx file
 import { auth, signInWithEmailAndPassword } from "@/components/firebase.tsx";
 
-const BASE_URL = "http://localhost:4000";
+const BASE_URL = "https://propcidback.onrender.com";
 
 // Custom hook for authentication
 const useAuth = () => {
