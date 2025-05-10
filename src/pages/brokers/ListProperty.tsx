@@ -14,6 +14,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
+const BASE_URL="https://propcidback.onrender.com"
 
 export default function CreatePropertyForm() {
   const { toast } = useToast();
@@ -71,7 +72,7 @@ export default function CreatePropertyForm() {
     videos.forEach((vid) => formData.append("videos", vid));
 
     try {
-      const res = await fetch("http://localhost:4000/v1/property/newProperty", {
+      const res = await fetch(`${BASE_URL}/v1/property/newProperty`, {
         method: "POST",
         body: formData,
       });
