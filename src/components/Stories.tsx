@@ -6,7 +6,7 @@ import axios from "axios";
 import { useAuth } from "@/context/AuthContext"; 
 import { Button } from "./ui/button";
 
-const BASE_URL = "https://propcidback.onrender.com/story/stories"; 
+const BASE_URL = "http://localhost:4000/story/stories"; 
 
 export type StoryType = {
   id: string;
@@ -291,6 +291,7 @@ const Stories = () => {
             <p className="text-gray-600 mb-4 text-sm">Please login to add your story.</p>
             <Button onClick={() => {
                 setShowLoginPrompt(false); 
+                localStorage.removeItem("pendingUpload");
                 // Here you might want to trigger the actual login dialog from Navbar
                 // For now, it just closes this prompt. User has to click login in Navbar.
             }} className="w-full bg-primary hover:bg-primary/80">OK</Button>
