@@ -187,16 +187,7 @@ const PropertiesPage = () => {
             Explore our extensive collection of premium properties
           </p>
           
-          <div className="max-w-md mx-auto relative">
-            <Input
-              type="text"
-              placeholder="Search by title or location..."
-              value={localSearchQuery}
-              onChange={handleSearch}
-              className="pl-10"
-            />
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-          </div>
+      
         </div>
 
         {loading ? (
