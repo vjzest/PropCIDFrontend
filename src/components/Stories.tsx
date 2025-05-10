@@ -6,7 +6,7 @@ import axios from "axios";
 import { useAuth } from "@/context/AuthContext"; 
 import { Button } from "./ui/button";
 
-const BASE_URL = "http://localhost:4000/story/stories"; 
+const BASE_URL = "https://propcidback.onrender.com/story/stories"; 
 
 export type StoryType = {
   id: string;
