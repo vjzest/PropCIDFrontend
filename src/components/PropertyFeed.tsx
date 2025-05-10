@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
-const BASE_URL = 'https://propcidback.onrender.com';
+const BASE_URL = "http://localhost:4000";
 
 const PropertyCard = ({ property }: { property: any }) => {
   const [showDialog, setShowDialog] = useState(false);
@@ -45,11 +45,11 @@ const PropertyCard = ({ property }: { property: any }) => {
       </div>
 
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
-        <DialogContent className="sm:max-w-lg">
+        <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
           <div>
             <div className="relative h-64 mb-4">
               <img
-                src={property.image}
+                src={property.images}
                 alt={property.title}
                 className="h-full w-full object-cover rounded-lg"
               />
