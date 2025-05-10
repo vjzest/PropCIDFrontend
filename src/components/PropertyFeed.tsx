@@ -1,8 +1,12 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
+import Navbar from '@/components/Navbar';
+import Footer from '@/components/Footer';
+import { Search } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 const BASE_URL = "https://propcidback.onrender.com";
 
 const PropertyCard = ({ property }: { property: any }) => {
@@ -56,10 +60,9 @@ const PropertyCard = ({ property }: { property: any }) => {
             </div>
 
             <div className="flex items-center mb-4">
-            <div className="w-8 h-8 rounded-full flex items-center justify-center bg-black text-white font-bold mr-2">
-  {property.owner ? getOwnerInitial(property.owner) : 'N/A'}
-</div>
-
+              <div className="w-8 h-8 rounded-full flex items-center justify-center bg-black text-white font-bold mr-2">
+                {property.owner ? getOwnerInitial(property.owner) : 'N/A'}
+              </div>
               <div>
                 <h3 className="font-bold">{property.owner}</h3>
                 <p className="text-sm text-neutral-600">Property Owner</p>
@@ -68,8 +71,7 @@ const PropertyCard = ({ property }: { property: any }) => {
 
             <h2 className="text-xl font-bold mb-2">{property.title}</h2>
             <p className="text-primary font-bold text-lg mb-2">{property.price}</p>
-            <p className="text-sm mb-4">{property.location}</p>
-
+            <p className="text-sm mb-2">{property.location}</p>
             <div className="flex justify-between mb-4 p-3 bg-neutral-50 rounded-lg">
               <div className="text-center">
                 <p className="font-bold">{property.beds}</p>
@@ -104,6 +106,7 @@ const PropertyCard = ({ property }: { property: any }) => {
                 <p className="text-sm text-neutral-700 mb-4">
                   {property.description}
                 </p>
+
                 <div className="mb-4">
                   <h3 className="font-bold mb-2">Contact Information</h3>
                   <p className="text-sm text-neutral-700">
@@ -128,54 +131,105 @@ const PropertyCard = ({ property }: { property: any }) => {
   );
 };
 
-const PropertyFeed = () => {
+const PropertiesPage = () => {
   const [properties, setProperties] = useState<any[]>([]);
-  const navigate = useNavigate();
+  const [filteredProperties, setFilteredProperties] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [localSearchQuery, setLocalSearchQuery] = useState('');
+  const location = useLocation();
+  const searchQuery = location.state?.searchQuery || '';
 
   useEffect(() => {
     const fetchProperties = async () => {
       try {
+        setLoading(true);
         const response = await axios.get(`${BASE_URL}/v1/property/getProperties`);
         setProperties(response.data.data);
+        
+        // If there's a search query from navbar or local search, filter the properties
+        const activeSearchQuery = searchQuery || localSearchQuery;
+        if (activeSearchQuery) {
+          const filtered = response.data.data.filter(property => {
+            const titleMatch = property.title.toLowerCase().includes(activeSearchQuery.toLowerCase());
+            const locationMatch = property.location.toLowerCase().includes(activeSearchQuery.toLowerCase());
+            return titleMatch || locationMatch;
+          });
+          setFilteredProperties(filtered);
+        } else {
+          setFilteredProperties(response.data.data);
+        }
       } catch (error) {
         console.error('Error fetching properties:', error);
+        setError('Failed to fetch properties. Please try again later.');
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchProperties();
-  }, []);
+  }, [searchQuery, localSearchQuery]);
 
-  const handleViewAllProperties = () => {
-    navigate('/properties', {
-      state: {
-        withNavbar: true,
-        withFooter: true
-      }
-    });
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setLocalSearchQuery(e.target.value);
   };
 
   return (
-    <section className="mb-12">
-      <h2 className="section-title">Featured Properties</h2>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {properties.slice(0, 4).map((property) => (
-          <PropertyCard key={property._id} property={property} />
-        ))}
+    <div className="min-h-screen bg-neutral-50">
+      <div className="w-[70%] mx-auto">
+        <Navbar />
       </div>
 
-      <div className="mt-8 text-center">
-        <Button
-          variant="outline"
-          size="lg"
-          onClick={handleViewAllProperties}
-          style={{ background: 'blue', color: 'white' }}
-        >
-          View All Properties
-        </Button>
+      <div className="container mx-auto px-4 py-8 pt-24">
+        <div className="text-center mb-12">
+          <h1 className="text-4xl font-bold text-primary mb-4">Discover Your Dream Property</h1>
+          <p className="text-lg text-neutral-600 mb-6">
+            Explore our extensive collection of premium properties
+          </p>
+          
+          <div className="max-w-md mx-auto relative">
+            <Input
+              type="text"
+              placeholder="Search by title or location..."
+              value={localSearchQuery}
+              onChange={handleSearch}
+              className="pl-10"
+            />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+          </div>
+        </div>
+
+        {loading ? (
+          <div className="text-center py-8">
+            <p className="text-lg text-neutral-600">Loading properties...</p>
+          </div>
+        ) : error ? (
+          <div className="text-center py-8">
+            <p className="text-lg text-red-600">{error}</p>
+          </div>
+        ) : filteredProperties.length === 0 ? (
+          <div className="text-center py-8">
+            <p className="text-lg text-neutral-600">No properties found matching your search.</p>
+          </div>
+        ) : (
+          <>
+            {localSearchQuery && (
+              <p className="text-sm text-neutral-600 mb-4">
+                Showing {filteredProperties.length} results for "{localSearchQuery}"
+              </p>
+            )}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredProperties.map((property) => (
+                <PropertyCard key={property._id} property={property} />
+              ))}
+            </div>
+          </>
+        )}
       </div>
-    </section>
+
+      <Footer />
+    </div>
   );
 };
 
-export default PropertyFeed;
+export default PropertiesPage;
