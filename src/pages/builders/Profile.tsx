@@ -1,525 +1,231 @@
-import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { useToast } from "@/hooks/use-toast";
-import { Building2, MapPin, Phone, Mail, Calendar, Award, Briefcase, Globe, Star, Users, DollarSign, Target, Upload } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+// src/components/BuilderProfile.tsx
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import { getAuth } from 'firebase/auth';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import { Pencil, Save, X } from 'lucide-react';
 
-interface BuilderProfileData {
+const BASE_URL = 'http://localhost:4000';
+
+interface ProfileData {
+  name: string;
   companyName: string;
-  email: string;
-  phone: string;
-  address: string;
-  registrationNumber: string;
-  about: string;
-  yearsOfExperience: number;
-  completedProjects: number;
-  website: string;
-  specialties: string[];
-  certifications: string[];
-  totalRevenue: string;
-  activeProjects: number;
-  teamSize: number;
-  awards: string[];
+  experience: number;
+  licenseNumber: string;
+  sales: number;
   profileImage?: string;
+  email: string;
 }
 
-const defaultProfile: BuilderProfileData = {
-  companyName: "Elite Construction Group",
-  email: "contact@eliteconstruction.com",
-  phone: "+91 9876543210",
-  address: "123 Business Park, Mumbai, Maharashtra",
-  registrationNumber: "REG123456",
-  about: "Leading construction company with over 20 years of experience in residential and commercial projects. Specializing in luxury developments and sustainable building practices.",
-  yearsOfExperience: 20,
-  completedProjects: 45,
-  website: "www.eliteconstruction.com",
-  specialties: ["Luxury Residential", "Commercial Complexes", "Green Buildings", "Smart Homes"],
-  certifications: ["ISO 9001:2015", "LEED Platinum Certified", "Safety Excellence Award 2023"],
-  totalRevenue: "₹2.5B",
-  activeProjects: 12,
-  teamSize: 250,
-  awards: ["Best Builder Award 2023", "Green Building Excellence 2022", "Innovation in Construction 2021"],
-  profileImage: ""
-};
-
 const BuilderProfile = () => {
-  const { toast } = useToast();
-  const [isEditing, setIsEditing] = useState(false);
+  const [profile, setProfile] = useState<ProfileData | null>(null);
+  const [form, setForm] = useState<Partial<ProfileData>>({});
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [profile, setProfile] = useState<BuilderProfileData>(defaultProfile);
-  const [newSpecialty, setNewSpecialty] = useState("");
-  const [newCertification, setNewCertification] = useState("");
-  const [newAward, setNewAward] = useState("");
+  const [isEditing, setIsEditing] = useState(false);
+  const auth = getAuth();
+  const navigate = useNavigate();
 
-  // Load profile data from API when component mounts
   useEffect(() => {
     const fetchProfile = async () => {
+      const user = auth.currentUser;
+      if (!user) return navigate("/login");
+
       try {
-        setIsLoading(true);
-        const response = await fetch('/api/builder/profile');
-        if (response.ok) {
-          const data = await response.json();
-          setProfile(data);
-        }
+        const { data } = await axios.get(`${BASE_URL}/builder/${user.uid}`);
+        setProfile(data);
+        setForm(data);
       } catch (error) {
-        console.error('Error fetching profile:', error);
-        toast({
-          title: "Error",
-          description: "Failed to fetch profile data",
-          variant: "destructive",
-        });
-      } finally {
-        setIsLoading(false);
+        toast.error("Failed to load profile");
+        console.error(error);
       }
     };
-
     fetchProfile();
-  }, []);
+  }, [auth.currentUser]);
 
-  const handleInputChange = (field: keyof BuilderProfileData, value: string | number | string[]) => {
-    setProfile(prev => ({ ...prev, [field]: value }));
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value, files } = e.target;
+    if (name === 'profileImage' && files && files[0]) {
+      setImageFile(files[0]);
+      setImagePreview(URL.createObjectURL(files[0]));
+    } else {
+      setForm({ ...form, [name]: value });
+    }
   };
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const user = auth.currentUser;
+    if (!user) return;
 
-    try {
-      const formData = new FormData();
-      formData.append('profileImage', file);
-
-      const response = await fetch('/api/builder/upload-profile-image', {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setProfile(prev => ({ ...prev, profileImage: data.imageUrl }));
-        toast({
-          title: "Success",
-          description: "Profile image uploaded successfully",
-        });
+    const formData = new FormData();
+    for (const [key, val] of Object.entries(form)) {
+      if (val !== undefined && val !== null) {
+        formData.append(key, val.toString());
       }
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to upload profile image",
-        variant: "destructive",
-      });
     }
-  };
+    if (imageFile) formData.append('profileImage', imageFile);
 
-  const handleAddSpecialty = () => {
-    if (newSpecialty.trim() && !profile.specialties.includes(newSpecialty.trim())) {
-      setProfile(prev => ({
-        ...prev,
-        specialties: [...prev.specialties, newSpecialty.trim()]
-      }));
-      setNewSpecialty("");
-    }
-  };
-
-  const handleRemoveSpecialty = (specialty: string) => {
-    setProfile(prev => ({
-      ...prev,
-      specialties: prev.specialties.filter(s => s !== specialty)
-    }));
-  };
-
-  const handleAddCertification = () => {
-    if (newCertification.trim() && !profile.certifications.includes(newCertification.trim())) {
-      setProfile(prev => ({
-        ...prev,
-        certifications: [...prev.certifications, newCertification.trim()]
-      }));
-      setNewCertification("");
-    }
-  };
-
-  const handleRemoveCertification = (certification: string) => {
-    setProfile(prev => ({
-      ...prev,
-      certifications: prev.certifications.filter(c => c !== certification)
-    }));
-  };
-
-  const handleAddAward = () => {
-    if (newAward.trim() && !profile.awards.includes(newAward.trim())) {
-      setProfile(prev => ({
-        ...prev,
-        awards: [...prev.awards, newAward.trim()]
-      }));
-      setNewAward("");
-    }
-  };
-
-  const handleRemoveAward = (award: string) => {
-    setProfile(prev => ({
-      ...prev,
-      awards: prev.awards.filter(a => a !== award)
-    }));
-  };
-
-  const handleSubmit = async () => {
+    setIsLoading(true);
     try {
-      setIsLoading(true);
-      const response = await fetch('/api/builder/profile', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(profile),
+      await axios.put(`${BASE_URL}/builder/${user.uid}`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
       });
-
-      if (response.ok) {
-        setIsEditing(false);
-        toast({
-          title: "Profile Updated",
-          description: "Your profile has been updated successfully",
-        });
-      } else {
-        throw new Error('Failed to update profile');
-      }
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to update profile",
-        variant: "destructive",
-      });
+      toast.success('Profile updated!');
+      setIsEditing(false);
+      const { data } = await axios.get(`${BASE_URL}/builder/${user.uid}`);
+      setProfile(data);
+      setForm(data);
+      setImagePreview(null);
+      setImageFile(null);
+    } catch (err) {
+      toast.error('Update failed');
+      console.error(err);
     } finally {
       setIsLoading(false);
     }
   };
 
+  const handleCancel = () => {
+    if (profile) setForm(profile);
+    setIsEditing(false);
+    setImagePreview(null);
+    setImageFile(null);
+  };
+
+  const displayInitial = profile?.name?.[0]?.toUpperCase();
+
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight">Company Profile</h2>
-          <p className="text-muted-foreground">
-            Manage your company information and credentials.
-          </p>
-        </div>
-        <Button 
-          variant={isEditing ? "default" : "outline"}
-          onClick={() => setIsEditing(!isEditing)}
-          disabled={isLoading}
-        >
-          {isEditing ? "Save Changes" : "Edit Profile"}
-        </Button>
-      </div>
-
-      {/* Profile Image Section - Now smaller and above company information */}
-      <div className="flex items-center gap-6 p-4 bg-muted rounded-lg">
-        <Avatar className="h-16 w-16">
-          <AvatarImage src={profile.profileImage} />
-          <AvatarFallback>{profile.companyName.charAt(0)}</AvatarFallback>
-        </Avatar>
-        <div className="flex-1">
-          <h3 className="text-lg font-semibold">{profile.companyName}</h3>
-          <p className="text-sm text-muted-foreground">{profile.email}</p>
-        </div>
-        {isEditing && (
-          <div className="space-y-2">
-            <Input
-              type="file"
-              accept="image/*"
-              onChange={handleImageUpload}
-              className="hidden"
-              id="profile-image"
-            />
-            <Button
-              variant="outline"
-              onClick={() => document.getElementById('profile-image')?.click()}
-              size="sm"
-            >
-              <Upload className="mr-2 h-4 w-4" />
-              Change Image
-            </Button>
-          </div>
-        )}
-      </div>
-
-      <div className="grid gap-6 md:grid-cols-2">
-        {/* Company Information Form */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Company Information</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Company Name</label>
-              <Input
-                value={profile.companyName}
-                onChange={(e) => handleInputChange('companyName', e.target.value)}
-                disabled={!isEditing}
-                placeholder="Enter company name"
-              />
+    <div className="min-h-screen bg-gradient-to-br from-blue-100 via-indigo-50 to-purple-100 py-8">
+      <div className="container mx-auto px-4 max-w-3xl">
+        <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg p-6 border border-white/20">
+          {/* Header */}
+          <div className="flex justify-between items-center mb-6">
+            <div>
+              <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Profile</h2>
+              <p className="text-gray-500 text-sm mt-0.5">Manage your profile information</p>
             </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Email</label>
-              <Input
-                value={profile.email}
-                onChange={(e) => handleInputChange('email', e.target.value)}
-                disabled={!isEditing}
-                type="email"
-                placeholder="Enter email"
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Phone</label>
-              <Input
-                value={profile.phone}
-                onChange={(e) => handleInputChange('phone', e.target.value)}
-                disabled={!isEditing}
-                placeholder="Enter phone number"
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Address</label>
-              <Textarea
-                value={profile.address}
-                onChange={(e) => handleInputChange('address', e.target.value)}
-                disabled={!isEditing}
-                placeholder="Enter company address"
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Registration Number</label>
-              <Input
-                value={profile.registrationNumber}
-                onChange={(e) => handleInputChange('registrationNumber', e.target.value)}
-                disabled={!isEditing}
-                placeholder="Enter registration number"
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Website</label>
-              <Input
-                value={profile.website}
-                onChange={(e) => handleInputChange('website', e.target.value)}
-                disabled={!isEditing}
-                placeholder="Enter website URL"
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium">About</label>
-              <Textarea
-                value={profile.about}
-                onChange={(e) => handleInputChange('about', e.target.value)}
-                disabled={!isEditing}
-                placeholder="Enter company description"
-              />
-            </div>
-            {isEditing && (
-              <Button onClick={handleSubmit} className="w-full" disabled={isLoading}>
-                {isLoading ? "Saving..." : "Save Changes"}
-              </Button>
+            {!isEditing ? (
+              <button
+                onClick={() => setIsEditing(true)}
+                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-lg hover:from-blue-600 hover:to-indigo-700 shadow-sm text-sm"
+              >
+                <Pencil className="w-4 h-4" />
+                Edit Profile
+              </button>
+            ) : (
+              <button
+                onClick={handleCancel}
+                className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 text-sm"
+              >
+                <X className="w-4 h-4" />
+                Cancel
+              </button>
             )}
-          </CardContent>
-        </Card>
+          </div>
 
-        {/* Company Statistics */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Company Statistics</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="grid gap-4">
-              <div className="flex items-center gap-4 p-4 bg-muted rounded-lg">
-                <div className="p-2 bg-primary/10 rounded-full">
-                  <Calendar className="h-6 w-6 text-primary" />
+          {/* Profile Image */}
+          <div className="flex justify-center mb-6">
+            <div className="relative group">
+              {imagePreview || profile?.profileImage ? (
+                <img
+                  src={imagePreview || profile?.profileImage}
+                  alt="Profile"
+                  className="w-32 h-32 rounded-full object-cover border-4 border-white shadow-md"
+                />
+              ) : (
+                <div className="w-32 h-32 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-full flex items-center justify-center text-white text-3xl font-bold border-4 border-white shadow-md">
+                  {displayInitial}
                 </div>
-                <div className="flex-1">
-                  <p className="text-sm text-muted-foreground">Years of Experience</p>
-                  {isEditing ? (
-                    <Input
-                      type="number"
-                      value={profile.yearsOfExperience}
-                      onChange={(e) => handleInputChange('yearsOfExperience', parseInt(e.target.value))}
-                      className="w-24"
-                    />
-                  ) : (
-                    <p className="text-2xl font-bold">{profile.yearsOfExperience}</p>
-                  )}
-                </div>
-              </div>
-              <div className="flex items-center gap-4 p-4 bg-muted rounded-lg">
-                <div className="p-2 bg-primary/10 rounded-full">
-                  <Building2 className="h-6 w-6 text-primary" />
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm text-muted-foreground">Completed Projects</p>
-                  {isEditing ? (
-                    <Input
-                      type="number"
-                      value={profile.completedProjects}
-                      onChange={(e) => handleInputChange('completedProjects', parseInt(e.target.value))}
-                      className="w-24"
-                    />
-                  ) : (
-                    <p className="text-2xl font-bold">{profile.completedProjects}</p>
-                  )}
-                </div>
-              </div>
-              <div className="flex items-center gap-4 p-4 bg-muted rounded-lg">
-                <div className="p-2 bg-primary/10 rounded-full">
-                  <DollarSign className="h-6 w-6 text-primary" />
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm text-muted-foreground">Total Revenue</p>
-                  {isEditing ? (
-                    <Input
-                      value={profile.totalRevenue}
-                      onChange={(e) => handleInputChange('totalRevenue', e.target.value)}
-                      className="w-32"
-                    />
-                  ) : (
-                    <p className="text-2xl font-bold">{profile.totalRevenue}</p>
-                  )}
-                </div>
-              </div>
-              <div className="flex items-center gap-4 p-4 bg-muted rounded-lg">
-                <div className="p-2 bg-primary/10 rounded-full">
-                  <Target className="h-6 w-6 text-primary" />
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm text-muted-foreground">Active Projects</p>
-                  {isEditing ? (
-                    <Input
-                      type="number"
-                      value={profile.activeProjects}
-                      onChange={(e) => handleInputChange('activeProjects', parseInt(e.target.value))}
-                      className="w-24"
-                    />
-                  ) : (
-                    <p className="text-2xl font-bold">{profile.activeProjects}</p>
-                  )}
-                </div>
-              </div>
-              <div className="flex items-center gap-4 p-4 bg-muted rounded-lg">
-                <div className="p-2 bg-primary/10 rounded-full">
-                  <Users className="h-6 w-6 text-primary" />
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm text-muted-foreground">Team Size</p>
-                  {isEditing ? (
-                    <Input
-                      type="number"
-                      value={profile.teamSize}
-                      onChange={(e) => handleInputChange('teamSize', parseInt(e.target.value))}
-                      className="w-24"
-                    />
-                  ) : (
-                    <p className="text-2xl font-bold">{profile.teamSize}</p>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <h3 className="font-medium">Specialties</h3>
-              <div className="flex flex-wrap gap-2">
-                {profile.specialties.map((specialty, index) => (
-                  <span
-                    key={index}
-                    className="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm flex items-center gap-2"
-                  >
-                    {specialty}
-                    {isEditing && (
-                      <button
-                        onClick={() => handleRemoveSpecialty(specialty)}
-                        className="text-primary hover:text-primary/70"
-                      >
-                        ×
-                      </button>
-                    )}
-                  </span>
-                ))}
-              </div>
+              )}
               {isEditing && (
-                <div className="flex gap-2">
-                  <Input
-                    value={newSpecialty}
-                    onChange={(e) => setNewSpecialty(e.target.value)}
-                    placeholder="Add new specialty"
-                    className="flex-1"
-                  />
-                  <Button onClick={handleAddSpecialty}>Add</Button>
+                <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+                  <label className="text-white text-sm cursor-pointer">
+                    Change
+                    <input type="file" name="profileImage" className="hidden" onChange={handleChange} />
+                  </label>
                 </div>
               )}
             </div>
+          </div>
 
-            <div className="space-y-4">
-              <h3 className="font-medium">Certifications</h3>
-              <div className="space-y-2">
-                {profile.certifications.map((certification, index) => (
-                  <div key={index} className="flex items-center gap-2">
-                    <Award className="h-4 w-4 text-primary" />
-                    <span className="flex-1">{certification}</span>
-                    {isEditing && (
-                      <button
-                        onClick={() => handleRemoveCertification(certification)}
-                        className="text-primary hover:text-primary/70"
-                      >
-                        ×
-                      </button>
-                    )}
+          {/* Form or View */}
+          {isEditing ? (
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {['email', 'name', 'companyName', 'experience', 'licenseNumber', 'sales'].map((field) => (
+                  <div key={field} className="space-y-1.5">
+                    <label className="text-sm font-medium text-gray-700">
+                      {field === 'name' ? 'Full Name' :
+                        field === 'companyName' ? 'Company Name' :
+                        field === 'experience' ? 'Experience (years)' :
+                        field === 'licenseNumber' ? 'License Number' :
+                        field === 'sales' ? 'Total Sales' :
+                        'Email'}
+                    </label>
+                    <input
+                      type={field === 'experience' || field === 'sales' ? 'number' : field === 'email' ? 'email' : 'text'}
+                      name={field}
+                      value={form[field as keyof ProfileData] ?? ''}
+                      onChange={handleChange}
+                      className="w-full p-2.5 border border-gray-200 rounded-lg bg-white/50 focus:ring-2 focus:ring-blue-500"
+                    />
                   </div>
                 ))}
               </div>
-              {isEditing && (
-                <div className="flex gap-2">
-                  <Input
-                    value={newCertification}
-                    onChange={(e) => setNewCertification(e.target.value)}
-                    placeholder="Add new certification"
-                    className="flex-1"
-                  />
-                  <Button onClick={handleAddCertification}>Add</Button>
-                </div>
-              )}
-            </div>
-
-            <div className="space-y-4">
-              <h3 className="font-medium">Awards & Recognition</h3>
-              <div className="space-y-2">
-                {profile.awards.map((award, index) => (
-                  <div key={index} className="flex items-center gap-2">
-                    <Star className="h-4 w-4 text-primary" />
-                    <span className="flex-1">{award}</span>
-                    {isEditing && (
-                      <button
-                        onClick={() => handleRemoveAward(award)}
-                        className="text-primary hover:text-primary/70"
-                      >
-                        ×
-                      </button>
-                    )}
-                  </div>
-                ))}
+              <div className="flex justify-end mt-4">
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-lg hover:from-blue-600 hover:to-indigo-700 text-sm disabled:opacity-50"
+                >
+                  <Save className="w-4 h-4" />
+                  {isLoading ? 'Saving...' : 'Save Changes'}
+                </button>
               </div>
-              {isEditing && (
-                <div className="flex gap-2">
-                  <Input
-                    value={newAward}
-                    onChange={(e) => setNewAward(e.target.value)}
-                    placeholder="Add new award"
-                    className="flex-1"
-                  />
-                  <Button onClick={handleAddAward}>Add</Button>
-                </div>
+            </form>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {profile && (
+                <>
+                  <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-4 rounded-lg border border-blue-100 space-y-4">
+                    <div>
+                      <label className="text-sm text-gray-500">Email</label>
+                      <p className="text-base font-semibold text-gray-800">{profile.email}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm text-gray-500">Full Name</label>
+                      <p className="text-base font-semibold text-gray-800">{profile.name}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm text-gray-500">Company Name</label>
+                      <p className="text-base font-semibold text-gray-800">{profile.companyName}</p>
+                    </div>
+                  </div>
+                  <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-4 rounded-lg border border-blue-100 space-y-4">
+                    <div>
+                      <label className="text-sm text-gray-500">Experience</label>
+                      <p className="text-base font-semibold text-gray-800">{profile.experience} years</p>
+                    </div>
+                    <div>
+                      <label className="text-sm text-gray-500">License Number</label>
+                      <p className="text-base font-semibold text-gray-800">{profile.licenseNumber}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm text-gray-500">Total Sales</label>
+                      <p className="text-base font-semibold text-gray-800">{profile.sales}</p>
+                    </div>
+                  </div>
+                </>
               )}
             </div>
-          </CardContent>
-        </Card>
+          )}
+        </div>
       </div>
     </div>
   );
 };
 
-export default BuilderProfile; 
+export default BuilderProfile;
