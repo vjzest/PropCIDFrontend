@@ -6,7 +6,7 @@ import { Dialog, DialogContent } from '@/components/ui/dialog';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { Search } from 'lucide-react';
-const BASE_URL = "https://propcidback.onrender.com";
+const BASE_URL = "http://localhost:4000";
 
 const PropertyCard = ({ property }: { property: any }) => {
   const [showDialog, setShowDialog] = useState(false);
@@ -70,8 +70,7 @@ const PropertyCard = ({ property }: { property: any }) => {
 
             <h2 className="text-xl font-bold mb-2">{property.title}</h2>
             <p className="text-primary font-bold text-lg mb-2">{property.price}</p>
-            <p className="text-sm mb-4">{property.location}</p>
-
+            <p className="text-sm mb-2">{property.location}</p>
             <div className="flex justify-between mb-4 p-3 bg-neutral-50 rounded-lg">
               <div className="text-center">
                 <p className="font-bold">{property.beds}</p>
@@ -106,6 +105,13 @@ const PropertyCard = ({ property }: { property: any }) => {
                 <p className="text-sm text-neutral-700 mb-4">
                   {property.description}
                 </p>
+
+                <div className="mb-4">
+                  <h3 className="font-bold mb-2">Contact Information</h3>
+                  <p className="text-sm text-neutral-700">
+                    Phone: {property.phoneNumber || 'Not available'}
+                  </p>
+                </div>
 
                 <div className="grid grid-cols-2 gap-3">
                   <Button className="w-full">Contact Owner</Button>
