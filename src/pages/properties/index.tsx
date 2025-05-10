@@ -1,22 +1,18 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-const BASE_URL='https://propcidback.onrender.com'
+import { Search } from 'lucide-react';
+const BASE_URL = "http://localhost:4000";
 
 const PropertyCard = ({ property }: { property: any }) => {
   const [showDialog, setShowDialog] = useState(false);
-  const navigate = useNavigate();
   const isAuthenticated = localStorage.getItem('authenticated') === 'true';
 
-  const handleLoginPrompt = () => {
-    setShowDialog(false);
-    navigate('/');
-  };
-
+  // Function to get the first letter of the owner's name as a fallback icon
   const getOwnerInitial = (name: string) => {
     return name.charAt(0).toUpperCase(); // Get the first letter and capitalize it
   };
@@ -40,22 +36,10 @@ const PropertyCard = ({ property }: { property: any }) => {
 
         <div className="p-4">
           <div className="flex items-center mb-3">
-            <div className="w-8 h-8 rounded-full overflow-hidden mr-2">
-              {property.ownerImage ? (
-                <img
-                  src={property.ownerImage}
-                  alt={property.owner}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="w-full h-full bg-gray-300 flex items-center justify-center text-white font-bold">
-                  {property.owner ? getOwnerInitial(property.owner) : 'N/A'}
-                </div>
-              )}
+            <div className="w-8 h-8 rounded-full flex items-center justify-center bg-gray-300 text-white font-bold mr-2">
+              {property.owner ? getOwnerInitial(property.owner) : 'N/A'}
             </div>
-            <span className="text-sm font-medium">
-              {property.ownerName || property.owner}
-            </span>
+            <span className="text-sm font-medium">{property.owner}</span>
           </div>
 
           <h3 className="text-base font-bold mb-1">{property.title}</h3>
@@ -64,27 +48,22 @@ const PropertyCard = ({ property }: { property: any }) => {
       </div>
 
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
-        <DialogContent className="sm:max-w-lg">
+        <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
           <div>
             <div className="relative h-64 mb-4">
               <img
-                src={property.image}
+                src={property.images}
                 alt={property.title}
                 className="h-full w-full object-cover rounded-lg"
               />
             </div>
 
             <div className="flex items-center mb-4">
-              <div className="flex items-center mb-3">
-                <div className="w-8 h-8 rounded-full flex items-center justify-center bg-gray-300 text-white font-bold mr-2">
-                  {property.owner ? getOwnerInitial(property.owner) : 'N/A'}
-                </div>
-                <span className="text-sm font-medium">
-                  {property.ownerName || property.owner}
-                </span>
+              <div className="w-8 h-8 rounded-full flex items-center justify-center bg-black text-white font-bold mr-2">
+                {property.owner ? getOwnerInitial(property.owner) : 'N/A'}
               </div>
               <div>
-                <h3 className="font-bold">{property.ownerName || 'Unknown Owner'}</h3>
+                <h3 className="font-bold">{property.owner}</h3>
                 <p className="text-sm text-neutral-600">Property Owner</p>
               </div>
             </div>
@@ -95,42 +74,38 @@ const PropertyCard = ({ property }: { property: any }) => {
 
             <div className="flex justify-between mb-4 p-3 bg-neutral-50 rounded-lg">
               <div className="text-center">
-                <p className="font-bold">{property.beds || 'N/A'}</p>
+                <p className="font-bold">{property.beds}</p>
                 <p className="text-xs text-neutral-500">Beds</p>
               </div>
               <div className="text-center">
-                <p className="font-bold">{property.baths || 'N/A'}</p>
+                <p className="font-bold">{property.baths}</p>
                 <p className="text-xs text-neutral-500">Baths</p>
               </div>
               <div className="text-center">
-                <p className="font-bold">{property.area || 'N/A'}</p>
+                <p className="font-bold">{property.area}</p>
                 <p className="text-xs text-neutral-500">Area</p>
               </div>
             </div>
 
             {isAuthenticated ? (
               <>
-                {Array.isArray(property.features) && property.features.length > 0 && (
-                  <>
-                    <h3 className="font-bold mb-2">Features</h3>
-                    <div className="flex flex-wrap gap-2 mb-4">
-                      {property.features.map((feature: string, index: number) => (
-                        <span key={index} className="bg-neutral-100 px-2 py-1 rounded text-xs">
-                          {feature}
-                        </span>
-                      ))}
-                    </div>
-                  </>
-                )}
+                <h3 className="font-bold mb-2">Features</h3>
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {Array.isArray(property.features) ? (
+                    property.features.map((feature: string, index: number) => (
+                      <span key={index} className="bg-neutral-100 px-2 py-1 rounded text-xs">
+                        {feature}
+                      </span>
+                    ))
+                  ) : (
+                    <p className="text-sm text-neutral-600">No features available</p>
+                  )}
+                </div>
 
                 <h3 className="font-bold mb-2">Description</h3>
-                <p className="text-sm text-neutral-700 mb-4">{property.description || 'N/A'}</p>
-
-                <h3 className="font-bold mb-2">Address</h3>
-                <p className="text-sm text-neutral-700 mb-4">{property.address || 'N/A'}</p>
-
-                <h3 className="font-bold mb-2">Contact Number</h3>
-                <p className="text-sm text-neutral-700 mb-4">{property.contactNumber || 'N/A'}</p>
+                <p className="text-sm text-neutral-700 mb-4">
+                  {property.description}
+                </p>
 
                 <div className="grid grid-cols-2 gap-3">
                   <Button className="w-full">Contact Owner</Button>
@@ -139,9 +114,7 @@ const PropertyCard = ({ property }: { property: any }) => {
               </>
             ) : (
               <div className="bg-neutral-50 p-4 rounded-lg mb-4 text-center">
-                <p className="text-sm text-neutral-600">
-                  Sign in to view full property details and contact options
-                </p>
+                <p className="text-sm text-neutral-600">Sign in to view full property details and contact options</p>
               </div>
             )}
           </div>
@@ -154,63 +127,65 @@ const PropertyCard = ({ property }: { property: any }) => {
 const PropertiesPage = () => {
   const [properties, setProperties] = useState<any[]>([]);
   const [filteredProperties, setFilteredProperties] = useState<any[]>([]);
-  const [searchParams] = useSearchParams();
-  const searchQuery = searchParams.get('search') || '';
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const location = useLocation();
+  const searchQuery = location.state?.searchQuery || '';
 
   useEffect(() => {
     const fetchProperties = async () => {
       try {
+        setLoading(true);
         const response = await axios.get(`${BASE_URL}/v1/property/getProperties`);
         setProperties(response.data.data);
+        
+        // If there's a search query, filter the properties
+        if (searchQuery) {
+          const filtered = response.data.data.filter(property => {
+            const titleMatch = property.title.toLowerCase().includes(searchQuery.toLowerCase());
+            const locationMatch = property.location.toLowerCase().includes(searchQuery.toLowerCase());
+            return titleMatch || locationMatch;
+          });
+          setFilteredProperties(filtered);
+        } else {
+          setFilteredProperties(response.data.data);
+        }
       } catch (error) {
         console.error('Error fetching properties:', error);
+        setError('Failed to fetch properties. Please try again later.');
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchProperties();
-  }, []);
-
-  // Filter properties based on search query
-  useEffect(() => {
-    if (searchQuery) {
-      const searchLower = searchQuery.toLowerCase();
-      const filtered = properties.filter(property => 
-        property.title.toLowerCase().includes(searchLower) ||
-        property.location.toLowerCase().includes(searchLower)
-      );
-      setFilteredProperties(filtered);
-    } else {
-      setFilteredProperties(properties);
-    }
-  }, [searchQuery, properties]);
+  }, [searchQuery]);
 
   return (
-    <div className="min-h-screen bg-neutral-50 flex flex-col">
+    <div className="min-h-screen bg-neutral-50">
       <div className="w-[70%] mx-auto">
         <Navbar />
       </div>
 
-      <div className="container mx-auto px-4 py-8 pt-24 flex-1">
+      <div className="container mx-auto px-4 py-8 pt-24">
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-primary mb-4">
-            {searchQuery ? `Search Results for "${searchQuery}"` : "Discover Your Dream Property"}
-          </h1>
+          <h1 className="text-4xl font-bold text-primary mb-4">Discover Your Dream Property</h1>
           <p className="text-lg text-neutral-600">
-            {searchQuery 
-              ? `Found ${filteredProperties.length} properties matching your search`
-              : "Explore our extensive collection of premium properties"}
+            Explore our extensive collection of premium properties
           </p>
         </div>
 
-        {filteredProperties.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-gray-500 text-lg">No properties found matching your search criteria.</p>
-            <Button 
-              onClick={() => window.location.href = '/properties'}
-              className="mt-4"
-            >
-              View All Properties
-            </Button>
+        {loading ? (
+          <div className="text-center py-8">
+            <p className="text-lg text-neutral-600">Loading properties...</p>
+          </div>
+        ) : error ? (
+          <div className="text-center py-8">
+            <p className="text-lg text-red-600">{error}</p>
+          </div>
+        ) : filteredProperties.length === 0 ? (
+          <div className="text-center py-8">
+            <p className="text-lg text-neutral-600">No properties found matching your search.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
