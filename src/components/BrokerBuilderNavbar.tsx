@@ -144,6 +144,9 @@ const BrokerBuilderNavbar = ({ children, userType }: BrokerBuilderNavbarProps) =
 
           {/* Right side - User Info and Logout */}
           <div className="flex items-center gap-4">
+            <Link to="/" className="text-sm text-gray-600 hover:text-primary">
+              Home
+            </Link>
             <span className="text-sm text-gray-600">
               <span className="font-semibold text-primary">
                 {userType === 'broker' ? 'Broker' : 'Builder'}
