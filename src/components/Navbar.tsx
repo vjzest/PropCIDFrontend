@@ -21,7 +21,7 @@ import { Label } from "./ui/label";
 // Import Firebase authentication methods from your firebase.tsx file
 import { auth, signInWithEmailAndPassword } from "@/components/firebase.tsx";
 
-const BASE_URL = "https://propcidback.onrender.com";
+const BASE_URL = "http://localhost:4000";
 
 // Custom hook for authentication
 const useAuth = () => {
@@ -513,6 +513,7 @@ const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
   const [isSignupDialogOpen, setIsSignupDialogOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const { isAuthenticated, userType, logout } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -525,6 +526,14 @@ const Navbar = () => {
       top: 0,
       behavior: "smooth",
     });
+  };
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/properties?search=${encodeURIComponent(searchQuery.trim())}`);
+      setSearchQuery("");
+    }
   };
 
   const handleLogout = () => {
@@ -558,16 +567,21 @@ const Navbar = () => {
 
           {/* Search Bar - Show on medium and larger screens */}
           <div className="hidden md:flex flex-1 max-w-xl mx-8">
-            <div className="relative w-full">
+            <form onSubmit={handleSearch} className="relative w-full">
               <Input
                 type="search"
                 placeholder="Search properties, builders..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full pl-4 pr-10 py-2 rounded-full border border-gray-200"
               />
-              <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+              <button
+                type="submit"
+                className="absolute right-3 top-1/2 transform -translate-y-1/2"
+              >
                 <Search className="w-4 h-4 text-gray-400" />
-              </div>
-            </div>
+              </button>
+            </form>
           </div>
 
           {/* Navigation Links - Show on medium and larger screens */}
@@ -778,14 +792,21 @@ const Navbar = () => {
           <div className="p-4 space-y-4">
             {/* Mobile Search */}
             <div className="relative">
-              <Input
-                type="search"
-                placeholder="Search properties, builders..."
-                className="w-full pl-4 pr-10 py-2 rounded-full border border-gray-200"
-              />
-              <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                <Search className="w-4 h-4 text-gray-400" />
-              </div>
+              <form onSubmit={handleSearch}>
+                <Input
+                  type="search"
+                  placeholder="Search properties, builders..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-4 pr-10 py-2 rounded-full border border-gray-200"
+                />
+                <button
+                  type="submit"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2"
+                >
+                  <Search className="w-4 h-4 text-gray-400" />
+                </button>
+              </form>
             </div>
 
             {/* Mobile Navigation Links */}
