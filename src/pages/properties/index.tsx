@@ -6,6 +6,7 @@ import { Dialog, DialogContent } from '@/components/ui/dialog';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { Search } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 const BASE_URL = "https://propcidback.onrender.com";
 
 const PropertyCard = ({ property }: { property: any }) => {
@@ -135,6 +136,7 @@ const PropertiesPage = () => {
   const [filteredProperties, setFilteredProperties] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [localSearchQuery, setLocalSearchQuery] = useState('');
   const location = useLocation();
   const searchQuery = location.state?.searchQuery || '';
 
@@ -145,11 +147,12 @@ const PropertiesPage = () => {
         const response = await axios.get(`${BASE_URL}/v1/property/getProperties`);
         setProperties(response.data.data);
         
-        // If there's a search query, filter the properties
-        if (searchQuery) {
+        // If there's a search query from navbar or local search, filter the properties
+        const activeSearchQuery = searchQuery || localSearchQuery;
+        if (activeSearchQuery) {
           const filtered = response.data.data.filter(property => {
-            const titleMatch = property.title.toLowerCase().includes(searchQuery.toLowerCase());
-            const locationMatch = property.location.toLowerCase().includes(searchQuery.toLowerCase());
+            const titleMatch = property.title.toLowerCase().includes(activeSearchQuery.toLowerCase());
+            const locationMatch = property.location.toLowerCase().includes(activeSearchQuery.toLowerCase());
             return titleMatch || locationMatch;
           });
           setFilteredProperties(filtered);
@@ -165,7 +168,11 @@ const PropertiesPage = () => {
     };
 
     fetchProperties();
-  }, [searchQuery]);
+  }, [searchQuery, localSearchQuery]);
+
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setLocalSearchQuery(e.target.value);
+  };
 
   return (
     <div className="min-h-screen bg-neutral-50">
@@ -176,9 +183,20 @@ const PropertiesPage = () => {
       <div className="container mx-auto px-4 py-8 pt-24">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-primary mb-4">Discover Your Dream Property</h1>
-          <p className="text-lg text-neutral-600">
+          <p className="text-lg text-neutral-600 mb-6">
             Explore our extensive collection of premium properties
           </p>
+          
+          <div className="max-w-md mx-auto relative">
+            <Input
+              type="text"
+              placeholder="Search by title or location..."
+              value={localSearchQuery}
+              onChange={handleSearch}
+              className="pl-10"
+            />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+          </div>
         </div>
 
         {loading ? (
@@ -194,11 +212,18 @@ const PropertiesPage = () => {
             <p className="text-lg text-neutral-600">No properties found matching your search.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredProperties.map((property) => (
-              <PropertyCard key={property._id} property={property} />
-            ))}
-          </div>
+          <>
+            {localSearchQuery && (
+              <p className="text-sm text-neutral-600 mb-4">
+                Showing {filteredProperties.length} results for "{localSearchQuery}"
+              </p>
+            )}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredProperties.map((property) => (
+                <PropertyCard key={property._id} property={property} />
+              ))}
+            </div>
+          </>
         )}
       </div>
 
