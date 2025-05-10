@@ -64,14 +64,24 @@ const BrokerBuilderNavbar = ({ children, userType }: BrokerBuilderNavbarProps) =
   }, [userType, navigate, toast]);
 
   const handleLogout = () => {
+    // Clear all authentication data
     localStorage.removeItem('authenticated');
     localStorage.removeItem('userType');
     localStorage.removeItem('userEmail');
+    localStorage.removeItem('firebaseToken');
+    localStorage.removeItem('builderProfile');
+    localStorage.removeItem('brokerProfile');
+    
+    // Clear any other stored data
+    localStorage.removeItem('pendingUpload');
+    
     toast({
       title: "Logged out",
       description: "You have been logged out successfully",
     });
-    navigate('/');
+    
+    // Force reload the page to clear all states
+    window.location.href = '/';
   };
 
   const menuItems = [
@@ -124,7 +134,7 @@ const BrokerBuilderNavbar = ({ children, userType }: BrokerBuilderNavbarProps) =
               <img 
                 src={logoImage}
                 alt="Logo"
-                className="w-21 h-12 object-contain"
+                className="h-12 w-auto object-contain"
               />
               {/* <span className="text-xl font-bold text-primary">
                 {userType === 'broker' ? 'Broker' : 'Builder'} Panel
