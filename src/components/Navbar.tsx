@@ -21,7 +21,7 @@ import { Label } from "./ui/label";
 // Import Firebase authentication methods from your firebase.tsx file
 import { auth, signInWithEmailAndPassword } from "@/components/firebase.tsx";
 
-const BASE_URL = "https://propcidback.onrender.com";
+const BASE_URL = "http://localhost:4000";
 
 // Custom hook for authentication
 const useAuth = () => {
@@ -558,7 +558,7 @@ const Navbar = () => {
           <Link to="/" className="flex items-center" onClick={scrollToTop}>
             <div className="flex items-center relative">
               <span className="text-2xl font-bold">PROP</span>
-              <span className="text-2xl font-bold text-red-500 relative">
+              <span className="text-2xl font-bold text-red-500 relative ml-1">
                 CID
                 <div className="absolute -top-1 left-1/2 transform -translate-x-1/2 w-1.5 h-1.5 bg-yellow-400 rounded-full"></div>
               </span>
