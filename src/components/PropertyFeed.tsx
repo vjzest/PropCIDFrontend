@@ -104,6 +104,9 @@ const PropertyCard = ({ property }: { property: any }) => {
                 <p className="text-sm text-neutral-700 mb-4">
                   {property.description}
                 </p>
+                 <p className="text-sm text-neutral-700">
+                    Phone: {property.phoneNumber || 'Not available'}
+                  </p>
 
                 <div className="grid grid-cols-2 gap-3">
                   <Button className="w-full">Contact Owner</Button>
