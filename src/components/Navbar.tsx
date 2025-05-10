@@ -244,7 +244,7 @@ const Navbar = () => {
   const handleSearch = (e: React.FormEvent) => { 
     e.preventDefault();
     if (searchQuery.trim()) {
-      navigate(`/properties?search=${encodeURIComponent(searchQuery.trim())}`);
+      navigate('/properties', { state: { searchQuery: searchQuery.trim() } });
       setSearchQuery(""); 
       if (mobileMenuOpen) setMobileMenuOpen(false); 
     }
