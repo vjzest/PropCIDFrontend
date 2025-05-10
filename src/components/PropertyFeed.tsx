@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
-const BASE_URL = "http://localhost:4000";
+const BASE_URL = "https://propcidback.onrender.com";
 
 const PropertyCard = ({ property }: { property: any }) => {
   const [showDialog, setShowDialog] = useState(false);
