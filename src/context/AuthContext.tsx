@@ -23,7 +23,7 @@ interface AuthContextType {
   logout: () => Promise<void>;
 }
 
-const BASE_URL = "http://localhost:4000";
+const BASE_URL = "https://propcidback.onrender.com";
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
