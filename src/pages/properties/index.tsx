@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-const BASE_URL='https://propcidback.onrender.com'
+const BASE_URL='http://localhost:4000'
 
 const PropertyCard = ({ property }: { property: any }) => {
   const [showDialog, setShowDialog] = useState(false);
@@ -153,6 +153,9 @@ const PropertyCard = ({ property }: { property: any }) => {
 
 const PropertiesPage = () => {
   const [properties, setProperties] = useState<any[]>([]);
+  const [filteredProperties, setFilteredProperties] = useState<any[]>([]);
+  const [searchParams] = useSearchParams();
+  const searchQuery = searchParams.get('search') || '';
 
   useEffect(() => {
     const fetchProperties = async () => {
@@ -167,6 +170,20 @@ const PropertiesPage = () => {
     fetchProperties();
   }, []);
 
+  // Filter properties based on search query
+  useEffect(() => {
+    if (searchQuery) {
+      const searchLower = searchQuery.toLowerCase();
+      const filtered = properties.filter(property => 
+        property.title.toLowerCase().includes(searchLower) ||
+        property.location.toLowerCase().includes(searchLower)
+      );
+      setFilteredProperties(filtered);
+    } else {
+      setFilteredProperties(properties);
+    }
+  }, [searchQuery, properties]);
+
   return (
     <div className="min-h-screen bg-neutral-50 flex flex-col">
       <div className="w-[70%] mx-auto">
@@ -175,17 +192,33 @@ const PropertiesPage = () => {
 
       <div className="container mx-auto px-4 py-8 pt-24 flex-1">
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-primary mb-4">Discover Your Dream Property</h1>
+          <h1 className="text-4xl font-bold text-primary mb-4">
+            {searchQuery ? `Search Results for "${searchQuery}"` : "Discover Your Dream Property"}
+          </h1>
           <p className="text-lg text-neutral-600">
-            Explore our extensive collection of premium properties
+            {searchQuery 
+              ? `Found ${filteredProperties.length} properties matching your search`
+              : "Explore our extensive collection of premium properties"}
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {properties.map((property) => (
-            <PropertyCard key={property._id} property={property} />
-          ))}
-        </div>
+        {filteredProperties.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-gray-500 text-lg">No properties found matching your search criteria.</p>
+            <Button 
+              onClick={() => window.location.href = '/properties'}
+              className="mt-4"
+            >
+              View All Properties
+            </Button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredProperties.map((property) => (
+              <PropertyCard key={property._id} property={property} />
+            ))}
+          </div>
+        )}
       </div>
 
       <Footer />
