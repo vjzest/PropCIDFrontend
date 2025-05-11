@@ -390,16 +390,27 @@ const Navbar = () => {
               </>
             ) : (
               <div className="flex items-center space-x-4">
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={() => navigate('/profile')} 
-                  className="text-primary border-primary hover:bg-primary hover:text-white p-2 h-10 w-10"
-                >
-                  <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium">
-                    {userEmail?.[0]?.toUpperCase() || 'U'}
-                  </div>
-                </Button>
+                {userType === "user" ? (
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => navigate('/profile')} 
+                    className="text-primary border-primary hover:bg-primary hover:text-white p-2 h-8 w-12"
+                  >
+                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium">
+                      {userEmail?.[0]?.toUpperCase() || 'U'}
+                    </div>
+                  </Button>
+                ) : (
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => navigate(`/${userType}`)} 
+                    className="text-primary border-primary hover:bg-primary hover:text-white"
+                  >
+                    <LogIn className="w-3 h-3 mr-1" />{userType.charAt(0).toUpperCase() + userType.slice(1)}
+                  </Button>
+                )}
                 <Button variant="destructive" size="sm" onClick={handleLogout}>
                   <LogOut className="w-3 h-3 mr-1" />Logout
                 </Button>
@@ -455,13 +466,17 @@ const Navbar = () => {
             ) : (
               <>
                 <Link 
-                  to="/profile" 
+                  to={userType === "user" ? "/profile" : `/${userType}`}
                   className="flex items-center justify-center p-3 text-gray-700 hover:bg-primary/10 rounded-md" 
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium">
-                    {userEmail?.[0]?.toUpperCase() || 'U'}
-                  </div>
+                  {userType === "user" ? (
+                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium">
+                      {userEmail?.[0]?.toUpperCase() || 'U'}
+                    </div>
+                  ) : (
+                    <span>{userType.charAt(0).toUpperCase() + userType.slice(1)}</span>
+                  )}
                 </Link>
                 <Button 
                   variant="destructive" 
