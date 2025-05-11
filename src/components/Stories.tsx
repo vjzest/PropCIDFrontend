@@ -128,16 +128,16 @@ const StoryModal = ({ story, onClose, onDelete }: { story: StoryType; onClose: (
   const { userEmail, isAuthenticated } = useAuth();
   const canDelete = isAuthenticated && story.userId === userEmail;
   return (
-    <div className="fixed inset-0 bg-black/80 z-[70] flex items-center justify-center p-4"> 
-      <div className="relative w-full max-w-md bg-black rounded-lg overflow-hidden shadow-2xl"> 
-        <div className="p-3 flex items-center justify-between border-b border-gray-700">
+    <div className="fixed inset-0 bg-black/80 z-[70] flex items-center justify-center p-2"> 
+      <div className="relative w-full max-w-sm bg-black rounded-lg overflow-hidden shadow-2xl"> 
+        <div className="p-2 flex items-center justify-between border-b border-gray-700">
             <div className="flex items-center">
-                {story.profileImage && <img src={story.profileImage} className="w-8 h-8 rounded-full mr-2" alt={story.Title || "profile"} />}
+                {story.profileImage && <img src={story.profileImage} className="w-6 h-6 rounded-full mr-2" alt={story.Title || "profile"} />}
                 <span className="font-medium text-white text-sm">{story.Title}</span>
             </div>
-            <button onClick={onClose} className="text-gray-400 hover:text-white text-2xl" aria-label="Close story viewer">×</button>
+            <button onClick={onClose} className="text-gray-400 hover:text-white text-xl" aria-label="Close story viewer">×</button>
         </div>
-        <div className="w-full aspect-[9/16] max-h-[75vh] bg-black flex items-center justify-center">
+        <div className="w-full aspect-[9/16] max-h-[60vh] bg-black flex items-center justify-center">
             {story.isVideo ? (
             <video src={story.imageUrl} controls autoPlay playsInline className="max-w-full max-h-full object-contain" />
             ) : (
@@ -145,7 +145,7 @@ const StoryModal = ({ story, onClose, onDelete }: { story: StoryType; onClose: (
             )}
         </div>
         {canDelete && (
-          <div className="p-3 border-t border-gray-700 text-center">
+          <div className="p-2 border-t border-gray-700 text-center">
             <Button onClick={(e) => { e.stopPropagation(); onDelete(); }} variant="destructive" size="sm" className="w-full">Delete Story</Button>
           </div>
         )}
@@ -252,18 +252,18 @@ const Stories = () => {
   }
 
   return (
-    <div className="w-full bg-white border-b py-3">
-      <div className="container mx-auto relative">
+    <div className="w-full bg-white border-b py-2">
+      <div className="container mx-auto relative max-w-3xl">
         <div className="flex items-center">
           {stories.length > 4 && <button onClick={() => scroll(-200)} className="absolute left-0 top-1/2 -translate-y-1/2 z-10 hidden sm:flex h-8 w-8 rounded-full bg-white/80 shadow-md items-center justify-center text-gray-600 hover:text-black backdrop-blur-sm" aria-label="Scroll left">←</button>}
           
-          <div ref={scrollContainer} className="flex overflow-x-auto scroll-smooth py-2 gap-x-4 scrollbar-hide px-2">
-            {/* Add Story Button: Now always visible, click logic handles auth */}
+          <div ref={scrollContainer} className="flex overflow-x-auto scroll-smooth py-1 gap-x-3 scrollbar-hide px-2">
+            {/* Add Story Button */}
             <div className="flex flex-col items-center cursor-pointer flex-shrink-0 text-center" onClick={handleAddClick} role="button" tabIndex={0} onKeyPress={(e) => e.key === 'Enter' && handleAddClick()} aria-label="Add new story">
-                <div className="w-16 h-16 rounded-full p-0.5 bg-gradient-to-tr from-blue-500 to-green-400">
-                    <div className="bg-white p-0.5 rounded-full w-full h-full flex items-center justify-center text-blue-500 text-3xl font-bold hover:bg-gray-50 transition-colors">+</div>
+                <div className="w-14 h-14 rounded-full p-0.5 bg-gradient-to-tr from-blue-500 to-green-400">
+                    <div className="bg-white p-0.5 rounded-full w-full h-full flex items-center justify-center text-blue-500 text-2xl font-bold hover:bg-gray-50 transition-colors">+</div>
                 </div>
-                <span className="mt-1 text-xs truncate max-w-[60px]">Add Story</span>
+                <span className="mt-1 text-xs truncate max-w-[50px]">Add Story</span>
             </div>
 
             {stories.map((story) => (
@@ -286,15 +286,13 @@ const Stories = () => {
           <div className="bg-white p-6 rounded-lg w-full max-w-xs relative shadow-xl text-center">
             <button onClick={() => {
                 setShowLoginPrompt(false); 
-                localStorage.removeItem("pendingUpload"); // Clear if user cancels
+                localStorage.removeItem("pendingUpload");
             }} className="absolute top-2 right-2 text-gray-400 hover:text-black text-xl" aria-label="Close login prompt">×</button>
             <h2 className="text-lg font-semibold mb-3 text-gray-800">Login Required</h2>
             <p className="text-gray-600 mb-4 text-sm">Please login to add your story.</p>
             <Button onClick={() => {
                 setShowLoginPrompt(false); 
                 localStorage.removeItem("pendingUpload");
-                // Here you might want to trigger the actual login dialog from Navbar
-                // For now, it just closes this prompt. User has to click login in Navbar.
             }} className="w-full bg-primary hover:bg-primary/80">OK</Button>
           </div>
         </div>
