@@ -16,7 +16,7 @@ interface User {
   specialization?: string;
 }
 
-const BASE_URL = "https://propcidback.onrender.com";
+const BASE_URL = "https://propb1.onrender.com";
 
 const AdminbuildersPage = () => {
   const [builders, setbuilders] = useState<User[]>([]); // Use User interface
