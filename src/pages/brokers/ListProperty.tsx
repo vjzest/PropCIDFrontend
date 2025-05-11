@@ -14,7 +14,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
-const BASE_URL="https://propcidback.onrender.com"
+const BASE_URL="https://propb1.onrender.com"
 
 export default function CreatePropertyForm() {
   const { toast } = useToast();
