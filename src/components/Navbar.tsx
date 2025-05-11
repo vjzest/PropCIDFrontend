@@ -46,7 +46,7 @@ const SignupSuccessMessageUI = ({ email, onClose }: { email: string; onClose: ()
     );
 };
 
-// Login Form Component (Same as before)
+// Login Form Component
 const LoginForm = ({ onSuccess }: { onSuccess?: () => void }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -60,18 +60,24 @@ const LoginForm = ({ onSuccess }: { onSuccess?: () => void }) => {
     setIsLoading(true);
     if (!email || !password) {
       toast({ title: "Error", description: "Please fill in all fields", variant: "destructive" });
-      setIsLoading(false); return;
+      setIsLoading(false); 
+      return;
     }
-    const result = await login(email, password); 
-    if (result.success) {
-      toast({ title: "Success", description: "Logged in successfully!" });
-      onSuccess?.();
-      const userTypeFromStorage = localStorage.getItem("userType");
-      navigate(userTypeFromStorage ? `/${userTypeFromStorage}` : "/");
-    } else {
-      toast({ title: "Error", description: result.message || "Invalid credentials", variant: "destructive" });
+    try {
+      const result = await login(email, password); 
+      if (result.success) {
+        onSuccess?.(); // Close dialog first
+        toast({ title: "Success", description: "Logged in successfully!" });
+        const userTypeFromStorage = localStorage.getItem("userType");
+        navigate(userTypeFromStorage ? `/${userTypeFromStorage}` : "/");
+      } else {
+        toast({ title: "Error", description: result.message || "Invalid credentials", variant: "destructive" });
+      }
+    } catch (error) {
+      toast({ title: "Error", description: "An unexpected error occurred", variant: "destructive" });
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   };
 
   return (
@@ -295,9 +301,36 @@ const Navbar = () => {
             {authLoading ? (<Button variant="outline" size="sm" disabled>...</Button>) : 
              !isAuthenticated ? (
               <>
-                <Dialog open={authDialogOpen} onOpenChange={setAuthDialogOpen}>
-                  <DialogTrigger asChild><Button variant="outline" size="sm" className="text-primary border-primary hover:bg-primary hover:text-white"><LogIn className="w-3 h-3 mr-1" />Login</Button></DialogTrigger>
-                  <DialogContent><DialogHeader><DialogTitle className="text-primary">Login to PropCID</DialogTitle></DialogHeader><LoginForm onSuccess={() => setAuthDialogOpen(false)} /></DialogContent>
+                <Dialog 
+                  open={authDialogOpen} 
+                  onOpenChange={(open) => {
+                    if (!open) {
+                      setAuthDialogOpen(false);
+                    }
+                  }}
+                >
+                  <DialogTrigger asChild>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="text-primary border-primary hover:bg-primary hover:text-white"
+                      onClick={() => {
+                        if (isAuthenticated) {
+                          navigate(userType ? `/${userType}` : '/');
+                          return;
+                        }
+                        setAuthDialogOpen(true);
+                      }}
+                    >
+                      <LogIn className="w-3 h-3 mr-1" />Login
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle className="text-primary">Login to PropCID</DialogTitle>
+                    </DialogHeader>
+                    <LoginForm onSuccess={() => setAuthDialogOpen(false)} />
+                  </DialogContent>
                 </Dialog>
                 
                 <Dialog 
