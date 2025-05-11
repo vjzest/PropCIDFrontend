@@ -7,7 +7,7 @@ import { useAuth } from "@/context/AuthContext";
 import { Button } from "./ui/button";
 import { X } from "lucide-react";
 
-const BASE_URL = "https://propcidback.onrender.com/story/stories"; 
+const BASE_URL = "https://propb1.onrender.com/story/stories"; 
 
 export type StoryType = {
   id: string;
