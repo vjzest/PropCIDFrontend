@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { useAuth } from "@/context/AuthContext"; 
 import { Button } from "./ui/button";
+import { X } from "lucide-react";
 
 const BASE_URL = "https://propcidback.onrender.com/story/stories"; 
 
@@ -267,7 +268,7 @@ const Stories = () => {
 
             {stories.map((story) => (
               <div key={story.id} className="flex-shrink-0" role="button" tabIndex={0} onClick={() => setSelectedStory(story)} onKeyPress={(e) => e.key === 'Enter' && setSelectedStory(story)} 
-                   aria-label={`View story ${story.Title || 'User'}`}> {/* Corrected aria-label */}
+                   aria-label={`View story ${story.Title || 'User'}`}>
                 <StoryItem story={story} onClick={() => setSelectedStory(story)} currentUserEmail={userEmail} />
               </div>
             ))}
