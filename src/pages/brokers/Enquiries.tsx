@@ -17,7 +17,7 @@ const EnquiriesPage = () => {
   const [enquiries, setEnquiries] = useState([]);
   const [selectedEnquiry, setSelectedEnquiry] = useState(null);
   const navigate = useNavigate();
-  const BASE_URL='https://propcidback.onrender.com'
+  const BASE_URL='https://propb1.onrender.com'
   // Fetch enquiries data from the API
   useEffect(() => {
     const fetchEnquiries = async () => {
