@@ -22,7 +22,7 @@ const AdminPropertiesPage = () => {
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
-  const BASE_URL='https://propcidback.onrender.com'
+  const BASE_URL='https://propb1.onrender.com'
 
   useEffect(() => {
     const fetchProperties = async () => {
