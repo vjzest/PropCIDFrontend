@@ -58,6 +58,8 @@ const LoginForm = ({ onSuccess }: { onSuccess?: () => void }) => {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    onSuccess?.(); // Close dialog immediately when login starts
+    
     if (!email || !password) {
       toast({ title: "Error", description: "Please fill in all fields", variant: "destructive" });
       setIsLoading(false); 
@@ -66,10 +68,10 @@ const LoginForm = ({ onSuccess }: { onSuccess?: () => void }) => {
     try {
       const result = await login(email, password); 
       if (result.success) {
-        onSuccess?.(); // Close dialog first
-        toast({ title: "Success", description: "Logged in successfully!" });
         const userTypeFromStorage = localStorage.getItem("userType");
-        navigate(userTypeFromStorage ? `/${userTypeFromStorage}` : "/");
+        // Ensure dialog stays closed and navigate
+        navigate(userTypeFromStorage ? `/${userTypeFromStorage}` : "/", { replace: true });
+        toast({ title: "Success", description: "Logged in successfully!" });
       } else {
         toast({ title: "Error", description: result.message || "Invalid credentials", variant: "destructive" });
       }
@@ -237,7 +239,7 @@ const SignupForm = ({
 const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
-  const [isSignupDialogOpen, setIsSignupDialogOpen] = useState(false); 
+  const [isSignupDialogOpen, setIsSignupDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const { isAuthenticated, userType, logout, loading: authLoading, userEmail } = useAuth();
   const { toast } = useToast();
@@ -302,9 +304,29 @@ const Navbar = () => {
               <Button variant="outline" size="sm" disabled>...</Button>
             ) : !isAuthenticated ? (
               <>
-                <Dialog open={authDialogOpen} onOpenChange={setAuthDialogOpen}>
+                <Dialog 
+                  open={authDialogOpen && !isAuthenticated} 
+                  onOpenChange={(open) => {
+                    if (isAuthenticated || !open) {
+                      setAuthDialogOpen(false);
+                      return;
+                    }
+                    setAuthDialogOpen(open);
+                  }}
+                >
                   <DialogTrigger asChild>
-                    <Button variant="outline" size="sm" className="text-primary border-primary hover:bg-primary hover:text-white">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="text-primary border-primary hover:bg-primary hover:text-white"
+                      onClick={() => {
+                        if (isAuthenticated) {
+                          navigate('/profile');
+                          return;
+                        }
+                        setAuthDialogOpen(true);
+                      }}
+                    >
                       <LogIn className="w-3 h-3 mr-1" />Login
                     </Button>
                   </DialogTrigger>
@@ -312,16 +334,20 @@ const Navbar = () => {
                     <DialogHeader>
                       <DialogTitle className="text-primary">Login to PropCID</DialogTitle>
                     </DialogHeader>
-                    <LoginForm onSuccess={() => setAuthDialogOpen(false)} />
+                    <LoginForm onSuccess={() => {
+                      setAuthDialogOpen(false);
+                    }} />
                   </DialogContent>
                 </Dialog>
                 
                 <Dialog 
                   open={isSignupDialogOpen} 
                   onOpenChange={(open) => {
-                    if (!open) {
+                    if (isAuthenticated) {
                       setIsSignupDialogOpen(false);
+                      return;
                     }
+                    setIsSignupDialogOpen(open);
                   }}
                 >
                   <DialogTrigger asChild>
@@ -329,7 +355,10 @@ const Navbar = () => {
                       size="sm" 
                       className="bg-primary hover:bg-primary/90 text-white"
                       onClick={() => {
-                        setIsSignupDialogOpen(true);
+                        if (isAuthenticated) {
+                          navigate('/profile');
+                          return;
+                        }
                       }}
                     >
                       <UserPlus className="w-3 h-3 mr-1" />Sign Up
@@ -405,7 +434,14 @@ const Navbar = () => {
                 <Button 
                   variant="outline" 
                   className="w-full text-primary border-primary hover:bg-primary hover:text-white" 
-                  onClick={() => { setAuthDialogOpen(true); setMobileMenuOpen(false); }}
+                  onClick={() => { 
+                    if (isAuthenticated) {
+                      navigate('/profile');
+                      return;
+                    }
+                    setAuthDialogOpen(true); 
+                    setMobileMenuOpen(false); 
+                  }}
                 >
                   <LogIn className="w-4 h-4 mr-2" />Login
                 </Button>
