@@ -3,7 +3,7 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-const BASE_URL='https://propcidback.onrender.com'
+const BASE_URL='https://propb1.onrender.com'
 
 const SERVICES = [
   {
