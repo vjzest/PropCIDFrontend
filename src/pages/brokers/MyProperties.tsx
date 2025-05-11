@@ -20,7 +20,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-const BASE_URL='https://propcidback.onrender.com'
+const BASE_URL='https://propb1.onrender.com'
 
 interface Property {
   id: string;
