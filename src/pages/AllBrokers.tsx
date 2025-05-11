@@ -8,7 +8,7 @@ import { useNavigate } from 'react-router-dom';
 
 // Broker categories to filter by
 const CATEGORIES = ['All', 'Luxury', 'Residential', 'Commercial', 'International'];
-const BASE_URL='https://propcidback.onrender.com'
+const BASE_URL='https://propb1.onrender.com'
 
 const BrokerCard = ({ broker }) => {
   const navigate = useNavigate();
