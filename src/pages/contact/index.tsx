@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-const BASE_URL='https://propcidback.onrender.com'
+const BASE_URL='https://propb1.onrender.com'
 
 const ContactPage = () => {
   const [formData, setFormData] = useState({
