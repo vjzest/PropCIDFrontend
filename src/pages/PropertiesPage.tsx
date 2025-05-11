@@ -5,7 +5,7 @@ import axios from "axios";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import PropertyCard from "@/components/PropertyCard";
-const BASE_URL = "https://propcidback.onrender.com";
+const BASE_URL = "https://propb1.onrender.com";
 
 interface Property {
   _id: string;
