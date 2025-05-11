@@ -239,7 +239,7 @@ const Navbar = () => {
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
   const [isSignupDialogOpen, setIsSignupDialogOpen] = useState(false); 
   const [searchQuery, setSearchQuery] = useState("");
-  const { isAuthenticated, userType, logout, loading: authLoading } = useAuth();
+  const { isAuthenticated, userType, logout, loading: authLoading, userEmail } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
@@ -283,7 +283,7 @@ const Navbar = () => {
             </form>
           </div>
           <div className="hidden md:flex items-center space-x-6">
-            <Link to="/" className="text-gray-700 hover:text-primary flex items-center gap-1" onClick={scrollToTop}><Home className="w-4 h-4" /><span>Home</span></Link>
+            <Link to="/" className="text-gray-700 hover:text-primary flex items-center gap-1" onClick={scrollToTop}><span>Home</span></Link>
             <Link to="/contact" className="text-gray-700 hover:text-primary" onClick={scrollToTop}>Contact</Link>
             <Link to="/services" className="text-gray-700 hover:text-primary" onClick={scrollToTop}>Services</Link>
             <div className="relative group">
@@ -298,30 +298,13 @@ const Navbar = () => {
             </div>
           </div>
           <div className="hidden md:flex items-center space-x-4">
-            {authLoading ? (<Button variant="outline" size="sm" disabled>...</Button>) : 
-             !isAuthenticated ? (
+            {authLoading ? (
+              <Button variant="outline" size="sm" disabled>...</Button>
+            ) : !isAuthenticated ? (
               <>
-                <Dialog 
-                  open={authDialogOpen} 
-                  onOpenChange={(open) => {
-                    if (!open) {
-                      setAuthDialogOpen(false);
-                    }
-                  }}
-                >
+                <Dialog open={authDialogOpen} onOpenChange={setAuthDialogOpen}>
                   <DialogTrigger asChild>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="text-primary border-primary hover:bg-primary hover:text-white"
-                      onClick={() => {
-                        if (isAuthenticated) {
-                          navigate(userType ? `/${userType}` : '/');
-                          return;
-                        }
-                        setAuthDialogOpen(true);
-                      }}
-                    >
+                    <Button variant="outline" size="sm" className="text-primary border-primary hover:bg-primary hover:text-white">
                       <LogIn className="w-3 h-3 mr-1" />Login
                     </Button>
                   </DialogTrigger>
@@ -344,7 +327,7 @@ const Navbar = () => {
                   <DialogTrigger asChild>
                     <Button 
                       size="sm" 
-                      className="bg-primary hover:bg-primary/90 text-white" 
+                      className="bg-primary hover:bg-primary/90 text-white"
                       onClick={() => {
                         setIsSignupDialogOpen(true);
                       }}
@@ -352,19 +335,19 @@ const Navbar = () => {
                       <UserPlus className="w-3 h-3 mr-1" />Sign Up
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="max-h-[90vh] overflow-y-auto p-0"> 
+                  <DialogContent className="max-h-[90vh] overflow-y-auto p-0">
                     <Tabs defaultValue="user" className="w-full">
-                      <DialogHeader className="p-6 pb-2"> 
+                      <DialogHeader className="p-6 pb-2">
                         <DialogTitle className="text-primary text-center">Create Account</DialogTitle>
                       </DialogHeader>
-                      <TabsList className="grid w-full grid-cols-4 sticky top-0 bg-white z-10 px-6 pt-2 pb-2 shadow-sm"> 
+                      <TabsList className="grid w-full grid-cols-4 sticky top-0 bg-white z-10 px-6 pt-2 pb-2 shadow-sm">
                         <TabsTrigger value="user">User</TabsTrigger>
                         <TabsTrigger value="builder">Builder</TabsTrigger>
                         <TabsTrigger value="broker">Broker</TabsTrigger>
                         <TabsTrigger value="admin">Admin</TabsTrigger>
                       </TabsList>
                       {["user", "builder", "broker", "admin"].map(role => (
-                        <TabsContent value={role} key={role} className="p-1"> 
+                        <TabsContent value={role} key={role} className="p-1">
                           <SignupForm 
                             type={role as "user"|"builder"|"broker"|"admin"} 
                             setAuthDialogOpen={setAuthDialogOpen} 
@@ -378,43 +361,82 @@ const Navbar = () => {
               </>
             ) : (
               <div className="flex items-center space-x-4">
-                <Button variant="outline" size="sm" onClick={() => navigate(userType ? `/${userType}`: '/')} className="text-primary border-primary hover:bg-primary hover:text-white capitalize">{userType || "Profile"}</Button>
-                <Button variant="destructive" size="sm" onClick={handleLogout}><LogOut className="w-3 h-3 mr-1" />Logout</Button>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => navigate('/profile')} 
+                  className="text-primary border-primary hover:bg-primary hover:text-white p-2 h-10 w-10"
+                >
+                  <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium">
+                    {userEmail?.[0]?.toUpperCase() || 'U'}
+                  </div>
+                </Button>
+                <Button variant="destructive" size="sm" onClick={handleLogout}>
+                  <LogOut className="w-3 h-3 mr-1" />Logout
+                </Button>
               </div>
             )}
           </div>
-          <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="md:hidden p-2 rounded-md hover:bg-gray-100"><Menu className="w-6 h-6 text-gray-700" /></button>
+          <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="md:hidden p-2 rounded-md hover:bg-gray-100">
+            <Menu className="w-6 h-6 text-gray-700" />
+          </button>
         </div>
       </nav>
 
-      {/* Mobile Menu Panel (Same as before) */}
+      {/* Mobile Menu Panel */}
       {mobileMenuOpen && (
         <div className="md:hidden fixed inset-0 top-[61px] bg-white z-40 p-4 space-y-4 overflow-y-auto">
-           <form onSubmit={handleSearch} className="relative w-full mb-4">
-              <Input type="search" placeholder="Search..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="w-full pl-4 pr-10 py-2 rounded-full border-gray-300 focus:ring-primary focus:border-primary" />
-              <button type="submit" className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-primary"><Search className="w-5 h-5" /></button>
-            </form>
-            <Link to="/" className="flex items-center p-3 text-gray-700 hover:bg-primary/10 rounded-md" onClick={() => setMobileMenuOpen(false)}><Home className="w-5 h-5 mr-3 text-primary" />Home</Link>
-            <Link to="/contact" className="flex items-center p-3 text-gray-700 hover:bg-primary/10 rounded-md" onClick={() => setMobileMenuOpen(false)}>Contact</Link>
-            <Link to="/services" className="flex items-center p-3 text-gray-700 hover:bg-primary/10 rounded-md" onClick={() => setMobileMenuOpen(false)}>Services</Link>
-            <div className="text-gray-700 font-medium p-3">Properties</div>
-            <Link to="/properties?type=residential" className="block pl-8 pr-3 py-2 text-sm text-gray-600 hover:bg-primary/10 rounded-md" onClick={() => setMobileMenuOpen(false)}>Residential</Link>
-            <Link to="/properties?type=commercial" className="block pl-8 pr-3 py-2 text-sm text-gray-600 hover:bg-primary/10 rounded-md" onClick={() => setMobileMenuOpen(false)}>Commercial</Link>
-            <Link to="/properties?type=luxury" className="block pl-8 pr-3 py-2 text-sm text-gray-600 hover:bg-primary/10 rounded-md" onClick={() => setMobileMenuOpen(false)}>Luxury</Link>
-            <div className="pt-6 space-y-3 border-t mt-4">
-            {authLoading ? (<Button className="w-full" disabled>Loading...</Button>) :
-             !isAuthenticated ? (
+          <form onSubmit={handleSearch} className="relative w-full mb-4">
+            <Input type="search" placeholder="Search..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="w-full pl-4 pr-10 py-2 rounded-full border-gray-300 focus:ring-primary focus:border-primary" />
+            <button type="submit" className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-primary"><Search className="w-5 h-5" /></button>
+          </form>
+          <Link to="/" className="flex items-center p-3 text-gray-700 hover:bg-primary/10 rounded-md" onClick={() => setMobileMenuOpen(false)}><Home className="w-5 h-5 mr-3 text-primary" />Home</Link>
+          <Link to="/contact" className="flex items-center p-3 text-gray-700 hover:bg-primary/10 rounded-md" onClick={() => setMobileMenuOpen(false)}>Contact</Link>
+          <Link to="/services" className="flex items-center p-3 text-gray-700 hover:bg-primary/10 rounded-md" onClick={() => setMobileMenuOpen(false)}>Services</Link>
+          <div className="text-gray-700 font-medium p-3">Properties</div>
+          <Link to="/properties?type=residential" className="block pl-8 pr-3 py-2 text-sm text-gray-600 hover:bg-primary/10 rounded-md" onClick={() => setMobileMenuOpen(false)}>Residential</Link>
+          <Link to="/properties?type=commercial" className="block pl-8 pr-3 py-2 text-sm text-gray-600 hover:bg-primary/10 rounded-md" onClick={() => setMobileMenuOpen(false)}>Commercial</Link>
+          <Link to="/properties?type=luxury" className="block pl-8 pr-3 py-2 text-sm text-gray-600 hover:bg-primary/10 rounded-md" onClick={() => setMobileMenuOpen(false)}>Luxury</Link>
+          <div className="pt-6 space-y-3 border-t mt-4">
+            {authLoading ? (
+              <Button className="w-full" disabled>Loading...</Button>
+            ) : !isAuthenticated ? (
               <>
-                <Button variant="outline" className="w-full text-primary border-primary hover:bg-primary hover:text-white" onClick={() => { setAuthDialogOpen(true); setMobileMenuOpen(false); }}><LogIn className="w-4 h-4 mr-2" />Login</Button>
-                <Button className="w-full bg-primary text-white hover:bg-primary/90" onClick={() => { setIsSignupDialogOpen(true); setMobileMenuOpen(false); }}><UserPlus className="w-4 h-4 mr-2" />Sign Up</Button>
+                <Button 
+                  variant="outline" 
+                  className="w-full text-primary border-primary hover:bg-primary hover:text-white" 
+                  onClick={() => { setAuthDialogOpen(true); setMobileMenuOpen(false); }}
+                >
+                  <LogIn className="w-4 h-4 mr-2" />Login
+                </Button>
+                <Button 
+                  className="w-full bg-primary text-white hover:bg-primary/90" 
+                  onClick={() => { setIsSignupDialogOpen(true); setMobileMenuOpen(false); }}
+                >
+                  <UserPlus className="w-4 h-4 mr-2" />Sign Up
+                </Button>
               </>
             ) : (
               <>
-                <Link to={userType ? `/${userType}`: '/'} className="flex items-center p-3 text-gray-700 hover:bg-primary/10 rounded-md capitalize" onClick={() => setMobileMenuOpen(false)}>{userType || "Profile"}</Link>
-                <Button variant="destructive" className="w-full" onClick={() => { handleLogout(); setMobileMenuOpen(false); }}><LogOut className="w-4 h-4 mr-2" />Logout</Button>
+                <Link 
+                  to="/profile" 
+                  className="flex items-center justify-center p-3 text-gray-700 hover:bg-primary/10 rounded-md" 
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium">
+                    {userEmail?.[0]?.toUpperCase() || 'U'}
+                  </div>
+                </Link>
+                <Button 
+                  variant="destructive" 
+                  className="w-full" 
+                  onClick={() => { handleLogout(); setMobileMenuOpen(false); }}
+                >
+                  <LogOut className="w-4 h-4 mr-2" />Logout
+                </Button>
               </>
             )}
-            </div>
+          </div>
         </div>
       )}
       
