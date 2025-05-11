@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { Pencil, Save, X } from 'lucide-react';
 
-const BASE_URL = 'https://propcidback.onrender.com';
+const BASE_URL = 'https://propb1.onrender.com';
 
 interface ProfileData {
   name: string;
