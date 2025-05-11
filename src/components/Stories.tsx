@@ -220,18 +220,20 @@ const Stories = () => {
     setStories((prev) => [newStory, ...prev]); 
   };
 
-  const handleDeleteStory = async (storyId: string) => {
-    if (!selectedStory || selectedStory.id !== storyId) return;
-    try {
-      // Corrected URL for delete request
-      await axios.delete(`${BASE_URL}/${storyId}`, { withCredentials: true }); 
-      setStories((prev) => prev.filter((s) => s.id !== storyId));
-      setSelectedStory(null); 
-    } catch (err) {
-      console.error("Delete story failed:", err);
-      alert("Failed to delete story.");
-    }
-  };
+ const handleDeleteStory = async (storyId: string) => {
+  if (!selectedStory || selectedStory.id !== storyId || !userEmail) return;
+  try {
+    await axios.delete(`${BASE_URL}/${storyId}`, {
+      data: { email: userEmail }, // Send email in request body
+      withCredentials: true,
+    });
+    setStories((prev) => prev.filter((s) => s.id !== storyId));
+    setSelectedStory(null);
+  } catch (err) {
+    console.error("Delete story failed:", err);
+    alert("Failed to delete story.");
+  }
+};
 
   const handleAddClick = () => {
     // console.log(`[Stories] handleAddClick: isAuthenticated: ${isAuthenticated}`);
