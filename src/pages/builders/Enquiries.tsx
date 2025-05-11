@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/table";
 import { Search, MessageSquare, ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-const BASE_URL='https://propcidback.onrender.com'
+const BASE_URL='https://propb1.onrender.com'
 
 const EnquiriesPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
