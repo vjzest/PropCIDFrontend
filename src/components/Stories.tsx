@@ -223,9 +223,9 @@ const Stories = () => {
  const handleDeleteStory = async (storyId: string) => {
   if (!selectedStory || selectedStory.id !== storyId || !userEmail) return;
   try {
-    await axios.delete(`${BASE_URL}/${storyId}`, {
-      data: { email: userEmail }, // Send email in request body
-      withCredentials: true,
+    await axios.delete(`${BASE_URL}/${storyId}?email=${encodeURIComponent(userEmail)}`, {
+  withCredentials: true,
+});
     });
     setStories((prev) => prev.filter((s) => s.id !== storyId));
     setSelectedStory(null);
