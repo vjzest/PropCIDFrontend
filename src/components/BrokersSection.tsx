@@ -10,7 +10,7 @@ const BROKER_CATEGORIES = [
   { id: 4, name: 'International', icon: '🌎' },
   { id: 5, name: 'Investment', icon: '📈' },
 ];
-const BASE_URL = 'https://propcidback.onrender.com';
+const BASE_URL = 'https://propb1.onrender.com';
 
 interface Broker {
   id: string;
