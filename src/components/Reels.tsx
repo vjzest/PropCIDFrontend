@@ -13,7 +13,7 @@ interface Reel {
   likes: number;
   comments: number;
 }
-const BASE_URL = "https://propcidback.onrender.com";
+const BASE_URL = "https://propb1.onrender.com";
 
 const ReelItem = ({ reel }: { reel: Reel }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
