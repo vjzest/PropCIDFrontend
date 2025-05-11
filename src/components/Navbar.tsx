@@ -16,6 +16,8 @@ import { useToast } from "@/hooks/use-toast";
 import { LogIn, LogOut, Menu, Search, UserPlus, X, Home, Video } from "lucide-react";
 
 import { useAuth } from "@/context/AuthContext";
+import logoImage from '../Logo.jpg';
+
 
 // Signup Success Message UI (Renders directly inside DialogContent controlled by SignupForm)
 const SignupSuccessMessageUI = ({ email, onClose }: { email: string; onClose: () => void }) => {
@@ -271,12 +273,15 @@ const Navbar = () => {
       <nav className="bg-white shadow-md px-4 py-3 fixed top-0 left-0 right-0 z-50">
         <div className="container mx-auto flex items-center justify-between">
           <Link to="/" className="flex items-center" onClick={scrollToTop}>
-            <div className="flex items-center relative">
-              <span className="text-2xl font-bold">PROP</span>
-              <span className="text-2xl font-bold text-red-500 relative ml-0.5">
-                CID<div className="absolute -top-1 left-1/2 transform -translate-x-1/2 w-1.5 h-1.5 bg-yellow-400 rounded-full"></div>
-              </span>
-            </div>
+          <div className="flex items-center">
+            <Link to="/admin" className="flex items-center">
+              <img 
+                src={logoImage}
+                alt="Logo" 
+                className="h-9 w-auto object-contain"
+              />
+            </Link>
+          </div>
           </Link>
           <div className="hidden md:flex flex-1 max-w-xl mx-8">
             <form onSubmit={handleSearch} className="relative w-full">
