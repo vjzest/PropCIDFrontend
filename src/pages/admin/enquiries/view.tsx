@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Mail, Phone, Calendar, User, Building2, MessageSquare, Clock } from 'lucide-react';
-const BASE_URL='https://propcidback.onrender.com'
+const BASE_URL='https://propb1.onrender.com'
 
 const ViewEnquiryPage = () => {
   const { id } = useParams();
