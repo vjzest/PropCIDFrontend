@@ -14,7 +14,7 @@ const CATEGORIES = [
   "Commercial",
   "International",
 ];
-const BASE_URL = "https://propcidback.onrender.com";
+const BASE_URL = "https://propb1.onrender.com";
 
 const BrokerCard = ({ broker }) => {
   const navigate = useNavigate();
