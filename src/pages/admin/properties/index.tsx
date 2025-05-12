@@ -10,8 +10,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Search, Filter, Home, Plus } from "lucide-react";
+import { Search, Filter, Home, Plus, Eye, X } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 const AdminPropertiesPage = () => {
   const [properties, setProperties] = useState<any[]>([]);
@@ -20,6 +26,8 @@ const AdminPropertiesPage = () => {
   const [filterStatus, setFilterStatus] = useState("all");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [selectedProperty, setSelectedProperty] = useState<any>(null);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
   const BASE_URL='https://propb1.onrender.com'
@@ -67,6 +75,11 @@ const AdminPropertiesPage = () => {
 
     return matchesSearch && matchesType && matchesStatus;
   });
+
+  const handleView = (property: any) => {
+    setSelectedProperty(property);
+    setIsViewModalOpen(true);
+  };
 
   const handleEdit = (id: string) => {
     navigate(`/admin/properties/${id}/edit`);
@@ -190,7 +203,16 @@ const AdminPropertiesPage = () => {
                 </TableCell>
                 <TableCell>{property.owner}</TableCell>
                 <TableCell>
-                 
+                  <div className="flex gap-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleView(property)}
+                      className="text-blue-500 hover:text-blue-700"
+                    >
+                      <Eye className="w-4 h-4 mr-1" />
+                      View
+                    </Button>
                   <Button
                     variant="ghost"
                     size="sm"
@@ -199,6 +221,7 @@ const AdminPropertiesPage = () => {
                   >
                     Delete
                   </Button>
+                  </div>
                 </TableCell>
               </TableRow>
             ))}
@@ -211,6 +234,109 @@ const AdminPropertiesPage = () => {
           <p className="text-muted-foreground">No properties found</p>
         </div>
       )}
+
+      {/* Property Details Modal */}
+      <Dialog open={isViewModalOpen} onOpenChange={setIsViewModalOpen}>
+        <DialogContent className="max-w-4xl">
+          <DialogHeader>
+            <DialogTitle className="flex justify-between items-center">
+              <span>Property Details</span>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsViewModalOpen(false)}
+                className="h-8 w-8 p-0"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </DialogTitle>
+          </DialogHeader>
+          {selectedProperty && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <img
+                  src={selectedProperty.image || '/placeholder-property.jpg'}
+                  alt={selectedProperty.title}
+                  className="w-full h-64 object-cover rounded-lg"
+                />
+                <div className="grid grid-cols-2 gap-4">
+                  {selectedProperty.images?.map((image: string, index: number) => (
+                    <img
+                      key={index}
+                      src={image}
+                      alt={`${selectedProperty.title} - ${index + 1}`}
+                      className="w-full h-32 object-cover rounded-lg"
+                    />
+                  ))}
+                </div>
+              </div>
+              <div className="space-y-4">
+                <div>
+                  <h2 className="text-2xl font-bold">{selectedProperty.title}</h2>
+                  <p className="text-gray-500">{selectedProperty.location}</p>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm text-gray-500">Price</p>
+                    <p className="font-semibold">{selectedProperty.rate}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">Type</p>
+                    <p className="font-semibold">{selectedProperty.type}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">Status</p>
+                    <p className="font-semibold">{selectedProperty.status}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">Size</p>
+                    <p className="font-semibold">{selectedProperty.size}</p>
+                  </div>
+                  {selectedProperty.type?.toLowerCase() !== "commercial" && (
+                    <>
+                      <div>
+                        <p className="text-sm text-gray-500">Bedrooms</p>
+                        <p className="font-semibold">{selectedProperty.bedrooms}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-500">Bathrooms</p>
+                        <p className="font-semibold">{selectedProperty.bathrooms}</p>
+                      </div>
+                    </>
+                  )}
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Description</p>
+                  <p className="mt-1">{selectedProperty.description}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Amenities</p>
+                  <div className="mt-1 flex flex-wrap gap-2">
+                    {Array.isArray(selectedProperty.amenities) ? (
+                      selectedProperty.amenities.map((amenity: string, index: number) => (
+                        <span
+                          key={index}
+                          className="px-2 py-1 bg-gray-100 rounded-full text-sm"
+                        >
+                          {amenity}
+                        </span>
+                      ))
+                    ) : (
+                      <span className="text-sm text-gray-500">No amenities listed</span>
+                    )}
+                  </div>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Contact Information</p>
+                  <p className="mt-1">Broker: {selectedProperty.owner}</p>
+                  <p>Phone: {selectedProperty.phone}</p>
+                  <p>Email: {selectedProperty.email}</p>
+                </div>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
