@@ -88,7 +88,7 @@ const BrokerCard = ({ broker }: { broker: Broker }) => {
       <div className="p-4">
         <div className="flex items-center mb-4">
           <div className="w-14 h-14 rounded-full overflow-hidden mr-3">
-            {broker.profileImage ? (
+              {broker.profileImage ? (
               <img 
                 src={broker.profileImage} 
                 alt={broker.name} 
@@ -103,10 +103,10 @@ const BrokerCard = ({ broker }: { broker: Broker }) => {
                   `;
                 }}
               />
-            ) : (
+              ) : (
               <div className="w-full h-full bg-blue-500 text-white flex items-center justify-center text-xl font-semibold">
                 {broker.name.charAt(0).toUpperCase()}
-              </div>
+            </div>
             )}
           </div>
           <div>
