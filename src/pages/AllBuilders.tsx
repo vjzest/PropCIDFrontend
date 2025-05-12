@@ -6,7 +6,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useNavigate } from "react-router-dom";
 
-// Broker categories to filter by
+// builder categories to filter by
 const CATEGORIES = [
   "All",
   "Luxury",
@@ -16,7 +16,8 @@ const CATEGORIES = [
 ];
 const BASE_URL = "https://propb1.onrender.com";
 
-const BrokerCard = ({ broker }) => {
+// Capitalize component name
+const BuilderCard = ({ builder }) => {
   const navigate = useNavigate();
   const isAuthenticated = localStorage.getItem("authenticated") === "true";
 
@@ -26,29 +27,29 @@ const BrokerCard = ({ broker }) => {
       "profileData",
       JSON.stringify({
         type: "builder",
-        id: broker.id,
-        name: broker.name,
-        email: broker.email,
-        companyName: broker.companyName || "Not specified",
-        registrationNumber: broker.registrationNumber || "Not specified",
-        createdAt: broker.createdAt,
-        profileImage: broker.profileImage,
-        category: broker.category || "Builder",
-        experience: broker.experience || "Not specified",
-        location: broker.location || "Not specified",
-        phone: broker.phone || "Not specified",
-        website: broker.website || "Not specified",
-        about: broker.about || "No description available",
-        completedProjects: broker.completedProjects || "0",
-        activeProjects: broker.activeProjects || "0",
-        totalRevenue: broker.totalRevenue || "0",
-        specialties: broker.specialties || [],
-        certifications: broker.certifications || [],
-        teamSize: broker.teamSize || "0",
-        awards: broker.awards || []
+        id: builder.id,
+        name: builder.name,
+        email: builder.email,
+        companyName: builder.companyName || "Not specified",
+        registrationNumber: builder.registrationNumber || "Not specified",
+        createdAt: builder.createdAt,
+        profileImage: builder.profileImage,
+        category: builder.category || "Builder",
+        experience: builder.experience || "Not specified",
+        location: builder.location || "Not specified",
+        phone: builder.phone || "Not specified",
+        website: builder.website || "Not specified",
+        about: builder.about || "No description available",
+        completedProjects: builder.completedProjects || "0",
+        activeProjects: builder.activeProjects || "0",
+        totalRevenue: builder.totalRevenue || "0",
+        specialties: builder.specialties || [],
+        certifications: builder.certifications || [],
+        teamSize: builder.teamSize || "0",
+        awards: builder.awards || [],
       })
     );
-    navigate(`/builders/${broker.id}`);
+    navigate(`/builders/${builder.id}`);
   };
 
   return (
@@ -56,31 +57,31 @@ const BrokerCard = ({ broker }) => {
       <div className="p-4">
         <div className="flex items-center mb-3">
           <div className="w-12 h-12 rounded-full overflow-hidden mr-3">
-            {broker.profileImage ? (
+            {builder.profileImage ? (
               <img
-                src={broker.profileImage}
-                alt={broker.name}
+                src={builder.profileImage}
+                alt={builder.name}
                 className="w-full h-full object-cover"
                 onError={(e) => {
                   // If image fails to load, show the first letter
                   e.currentTarget.style.display = "none";
                   e.currentTarget.parentElement!.innerHTML = `
                     <div class="w-full h-full bg-blue-500 text-white flex items-center justify-center text-xl font-semibold">
-                      ${broker.name.charAt(0).toUpperCase()}
+                      ${builder.name.charAt(0).toUpperCase()}
                     </div>
                   `;
                 }}
               />
             ) : (
               <div className="w-full h-full bg-blue-500 text-white flex items-center justify-center text-xl font-semibold">
-                {broker.name.charAt(0).toUpperCase()}
+                {builder.name.charAt(0).toUpperCase()}
               </div>
             )}
           </div>
           <div>
-            <h3 className="text-base font-bold">{broker.name}</h3>
+            <h3 className="text-base font-bold">{builder.name}</h3>
             <span className="text-xs py-0.5 px-2 bg-neutral-100 rounded-full">
-              {broker.category || "Builder"}
+              {builder.category || "Builder"}
             </span>
           </div>
         </div>
@@ -88,26 +89,34 @@ const BrokerCard = ({ broker }) => {
         <div className="grid grid-cols-2 gap-2 mb-3">
           <div>
             <p className="text-neutral-600 text-xs">Location</p>
-            <p className="font-medium text-sm">{broker.location || "Not specified"}</p>
+            <p className="font-medium text-sm">
+              {builder.location || "Not specified"}
+            </p>
           </div>
           <div>
             <p className="text-neutral-600 text-xs">Experience</p>
-            <p className="font-medium text-sm">{broker.experience || "Not specified"}</p>
+            <p className="font-medium text-sm">
+              {builder.experience || "Not specified"}
+            </p>
           </div>
           {isAuthenticated && (
             <>
               <div>
                 <p className="text-neutral-600 text-xs">Completed Projects</p>
-                <p className="font-medium text-sm">{broker.completedProjects || "0"}</p>
+                <p className="font-medium text-sm">
+                  {builder.completedProjects || "0"}
+                </p>
               </div>
               <div>
                 <p className="text-neutral-600 text-xs">Active Projects</p>
-                <p className="font-medium text-sm">{broker.activeProjects || "0"}</p>
+                <p className="font-medium text-sm">
+                  {builder.activeProjects || "0"}
+                </p>
               </div>
               <div className="col-span-2">
                 <p className="text-neutral-600 text-xs">Specialties</p>
                 <p className="font-medium text-sm">
-                  {broker.specialties?.join(", ") || "Not specified"}
+                  {builder.specialties?.join(", ") || "Not specified"}
                 </p>
               </div>
             </>
@@ -129,19 +138,19 @@ const BrokerCard = ({ broker }) => {
   );
 };
 
-const AllBrokers = () => {
+const Allbuilders = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
-  const [brokers, setBrokers] = useState<any[]>([]);
+  const [builders, setbuilders] = useState<any[]>([]);
 
   // Add useEffect to scroll to top when component mounts
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
-  // Fetch broker data from API
+  // Fetch builder data from API
   useEffect(() => {
-    const fetchBrokers = async () => {
+    const fetchbuilders = async () => {
       try {
         const response = await fetch(`${BASE_URL}/api/auth/user`);
         const data = await response.json();
@@ -151,10 +160,10 @@ const AllBrokers = () => {
 
         // Access the 'users' field and check if it's an array
         if (Array.isArray(data.users)) {
-          const brokerData = data.users.filter(
+          const builderData = data.users.filter(
             (user: any) => user.userType === "builder"
           );
-          setBrokers(brokerData);
+          setbuilders(builderData);
         } else {
           console.error(
             'API response does not contain a valid "users" array:',
@@ -163,19 +172,24 @@ const AllBrokers = () => {
           // Optionally, handle cases when the response is not in the expected format
         }
       } catch (error) {
-        console.error("Error fetching broker data:", error);
+        console.error("Error fetching builder data:", error);
       }
     };
 
-    fetchBrokers();
+    fetchbuilders();
   }, []);
 
-  const filteredBrokers = brokers.filter((broker) => {
+  const filteredbuilders = builders.filter((builder) => {
+    // Safely access the builder's name and location properties
     const matchesSearch =
-      broker.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      broker.location.toLowerCase().includes(searchTerm.toLowerCase());
+      (builder.name &&
+        builder.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (builder.location &&
+        builder.location.toLowerCase().includes(searchTerm.toLowerCase()));
+
     const matchesCategory =
-      selectedCategory === "All" || broker.category === selectedCategory;
+      selectedCategory === "All" || builder.category === selectedCategory;
+
     return matchesSearch && matchesCategory;
   });
 
@@ -184,13 +198,13 @@ const AllBrokers = () => {
       <Navbar />
       <main className="min-h-screen bg-gray-50">
         <div className="container mx-auto px-4 py-8">
-          <h1 className="text-3xl font-bold mb-8">All Brokers</h1>
+          <h1 className="text-3xl font-bold mb-8">All builders</h1>
 
           <div className="flex flex-col md:flex-row gap-4 mb-8">
             <div className="flex-1">
               <Input
                 type="text"
-                placeholder="Search brokers by name or location..."
+                placeholder="Search builders by name or location..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full"
@@ -210,8 +224,8 @@ const AllBrokers = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredBrokers.map((broker) => (
-              <BrokerCard key={broker.id} broker={broker} />
+            {filteredbuilders.map((builder) => (
+              <BuilderCard key={builder.id} builder={builder} />
             ))}
           </div>
         </div>
@@ -221,4 +235,4 @@ const AllBrokers = () => {
   );
 };
 
-export default AllBrokers;
+export default Allbuilders;
