@@ -3,24 +3,37 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Eye, X, Home, Search } from "lucide-react";
 
-// Define the User interface (adding userType)
 interface User {
   _id: string;
   name: string;
   email: string;
-  userType: string; // Add the userType field
+  userType: string;
   companyName?: string;
   isVerified: boolean;
   location?: string;
   specialization?: string;
+  experience?: number;
+  sales?: number;
+  phone?: string;
+  profileImage?: string;
 }
 
 const BASE_URL = "https://propb1.onrender.com";
 
 const AdminbuildersPage = () => {
-  const [builders, setbuilders] = useState<User[]>([]); // Use User interface
+  const [builders, setbuilders] = useState<User[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedbuilder, setSelectedbuilder] = useState<User | null>(null);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -36,7 +49,9 @@ const AdminbuildersPage = () => {
         });
 
         const allUsers = response.data.users || [];
-        const builderUsers = allUsers.filter((user: User) => user.userType === "builder");
+        const builderUsers = allUsers.filter(
+          (user: User) => user.userType === "builder"
+        );
 
         setbuilders(builderUsers);
       } catch (error) {
@@ -47,95 +62,159 @@ const AdminbuildersPage = () => {
     fetchbuilders();
   }, []);
 
-  const filteredbuilders = builders.filter((builder) =>
-    builder.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    builder.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (builder.location || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (builder.specialization || "").toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredbuilders = builders.filter(
+    (builder) =>
+      builder.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      builder.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      builder.companyName?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const handleView = (builder: User) => {
+    setSelectedbuilder(builder);
+    setIsViewModalOpen(true);
+  };
+
   return (
-    <div className="min-h-screen bg-neutral-50">
-      <div className="container mx-auto px-4 pt-2">
-        <div className="bg-white shadow-lg rounded-lg overflow-hidden">
-          <div className="bg-primary p-6 text-white">
-            <h1 className="text-2xl font-bold">Manage builders</h1>
-            <p className="text-primary-50">View and manage all registered builder accounts</p>
-          </div>
-
-          <div className="p-6">
-            <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
-              <div className="w-full md:w-1/3">
-                <Input
-                  placeholder="Search builders..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full"
-                />
-              </div>
-              <div className="flex gap-2">
-                <Button className="bg-primary hover:bg-primary/90">Add New builder</Button>
-              </div>
-            </div>
-
-            <div className="overflow-x-auto">
-              <table className="w-full border-collapse">
-                <thead>
-                  <tr className="bg-gray-50 text-left">
-                    <th className="px-4 py-3 text-sm font-medium text-gray-600">builder Name</th>
-                    <th className="px-4 py-3 text-sm font-medium text-gray-600">Email</th>
-                    <th className="px-4 py-3 text-sm font-medium text-gray-600">Company</th>
-                    <th className="px-4 py-3 text-sm font-medium text-gray-600">Status</th>
-                    <th className="px-4 py-3 text-sm font-medium text-gray-600">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y">
-                  {filteredbuilders.map((builder) => (
-                    <tr key={builder._id}>
-                      <td className="px-4 py-4">{builder.name}</td>
-                      <td className="px-4 py-4">{builder.email}</td>
-                      <td className="px-4 py-4">{builder.companyName || "-"}</td>
-                      <td className="px-4 py-4">
-                        <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
-                          builder.isVerified ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"
-                        }`}>
-                          {builder.isVerified ? "Verified" : "Pending"}
-                        </span>
-                      </td>
-                      <td className="px-4 py-4">
-                        <div className="flex space-x-2">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => navigate(`/admin/builders/${builder._id}/view`)}
-                          >
-                            View
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="text-primary border-primary"
-                            onClick={() => navigate(`/admin/builders/${builder._id}/edit`)}
-                          >
-                            Edit
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                  {filteredbuilders.length === 0 && (
-                    <tr>
-                      <td colSpan={5} className="px-4 py-6 text-center text-gray-500">
-                        No builders found matching your search.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-bold flex items-center gap-2">
+          <Home className="w-6 h-6" />
+          builders
+        </h1>
       </div>
+
+      <div className="relative w-full md:w-1/3">
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+        <Input
+          placeholder="Search builders..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="pl-10"
+        />
+      </div>
+
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Name</TableHead>
+              <TableHead>Email</TableHead>
+              <TableHead>Company</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Action</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filteredbuilders.map((builder) => (
+              <TableRow key={builder._id}>
+                <TableCell>{builder.name}</TableCell>
+                <TableCell>{builder.email}</TableCell>
+                <TableCell>{builder.companyName || "N/A"}</TableCell>
+                <TableCell>
+                  {builder.isVerified ? (
+                    <span className="text-green-600">Verified</span>
+                  ) : (
+                    <span className="text-red-600">Unverified</span>
+                  )}
+                </TableCell>
+                <TableCell>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleView(builder)}
+                    className="text-blue-500 hover:text-blue-700"
+                  >
+                    <Eye className="w-4 h-4 mr-1" />
+                    View
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+
+      {filteredbuilders.length === 0 && (
+        <div className="text-center py-10 text-muted-foreground">
+          No builders found
+        </div>
+      )}
+
+      {/* builder Details Modal */}
+      <Dialog open={isViewModalOpen} onOpenChange={setIsViewModalOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex justify-between items-center">
+              <span>builder Details</span>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsViewModalOpen(false)}
+                className="h-8 w-8 p-0"
+              >
+                {/* <X className="h-4 w-4" /> */}
+              </Button>
+            </DialogTitle>
+          </DialogHeader>
+          {selectedbuilder && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+              <div className="space-y-4">
+              {selectedbuilder.profileImage ? (
+  <img
+    src={selectedbuilder.profileImage}
+    alt={selectedbuilder.name}
+    className="w-full h-48 object-cover rounded-md"
+  />
+) : (
+  <div className="w-full h-48 flex items-center justify-center bg-gray-200 rounded-md text-4xl font-bold text-gray-600">
+    {selectedbuilder.name?.charAt(0).toUpperCase() || "B"}
+  </div>
+)}
+              </div>
+              <div className="space-y-2">
+                <div>
+                  <p className="text-sm text-gray-500">Name</p>
+                  <p className="font-medium">{selectedbuilder.name}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Email</p>
+                  <p className="font-medium">{selectedbuilder.email}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Company</p>
+                  <p className="font-medium">{selectedbuilder.companyName || "N/A"}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Phone</p>
+                  <p className="font-medium">{selectedbuilder.phone || "N/A"}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Location</p>
+                  <p className="font-medium">{selectedbuilder.location || "N/A"}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Specialization</p>
+                  <p className="font-medium">{selectedbuilder.specialization || "N/A"}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Experience</p>
+                  <p className="font-medium">{selectedbuilder.experience || 0} yrs</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Sales</p>
+                  <p className="font-medium">{selectedbuilder.sales || 0}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Status</p>
+                  <p className="font-medium">
+                    {selectedbuilder.isVerified ? "Verified" : "Unverified"}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
