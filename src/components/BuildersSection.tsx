@@ -31,6 +31,7 @@ interface Builder {
   completedProjects: number;
   averageProjectSize: string;
   totalValueBuilt: string;
+  teamSize?: number;
 }
 
 const BuilderCard = ({ builder }: { builder: Builder }) => {
@@ -58,7 +59,28 @@ const BuilderCard = ({ builder }: { builder: Builder }) => {
   };
 
   const handleViewProfile = () => {
-    navigate("/builder-profile");
+    // Store builder profile data in localStorage for the profile page
+    localStorage.setItem('profileData', JSON.stringify({
+      type: 'builder',
+      id: builder.id,
+      name: builder.name,
+      email: builder.email,
+      image: builder.image,
+      category: builder.category || 'Builder',
+      experience: builder.experience || 'Not specified',
+      location: builder.location || 'Not specified',
+      phone: builder.phone || 'Not specified',
+      website: builder.website || 'Not specified',
+      about: builder.about || 'No description available',
+      projects: builder.projects || '0',
+      rating: builder.rating || '0',
+      teamSize: builder.teamSize || '0',
+      completedProjects: builder.completedProjects || '0',
+      currentProjects: builder.currentProjects || '0',
+      specialties: builder.specialties || [],
+      certifications: builder.certifications || []
+    }));
+    navigate(`/builders/${builder.id}`);
   };
 
   const renderProfileImage = builder.image ? (
