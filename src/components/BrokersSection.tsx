@@ -10,7 +10,7 @@ const BROKER_CATEGORIES = [
   { id: 4, name: 'International', icon: '🌎' },
   { id: 5, name: 'Investment', icon: '📈' },
 ];
-const BASE_URL = 'https://propb1.onrender.com';
+const BASE_URL='https://propb1.onrender.com';
 
 interface Broker {
   id: string;
@@ -20,6 +20,20 @@ interface Broker {
   userType: string;
   profileImage?: string; // Optional image field
   createdAt: { _seconds: number, _nanoseconds: number }; // timestamp
+  category?: string;
+  experience?: string;
+  location?: string;
+  phone?: string;
+  website?: string;
+  about?: string;
+  propertiesSold?: string;
+  activeListings?: string;
+  totalSales?: string;
+  specialties?: string[];
+  certifications?: string[];
+  languages?: string[];
+  averagePrice?: string;
+  rating?: string;
 }
 
 const BrokerCard = ({ broker }: { broker: Broker }) => {
@@ -50,6 +64,21 @@ const BrokerCard = ({ broker }: { broker: Broker }) => {
       email: broker.email,
       licenseNumber: broker.licenseNumber,
       createdAt: broker.createdAt,
+      profileImage: broker.profileImage,
+      category: broker.category || 'Broker',
+      experience: broker.experience || 'Not specified',
+      location: broker.location || 'Not specified',
+      phone: broker.phone || 'Not specified',
+      website: broker.website || 'Not specified',
+      about: broker.about || 'No description available',
+      propertiesSold: broker.propertiesSold || '0',
+      activeListings: broker.activeListings || '0',
+      totalSales: broker.totalSales || '0',
+      specialties: broker.specialties || [],
+      certifications: broker.certifications || [],
+      languages: broker.languages || [],
+      averagePrice: broker.averagePrice || 'Not specified',
+      rating: broker.rating || '0'
     }));
     navigate(`/brokers/${broker.id}`);
   };
@@ -59,18 +88,32 @@ const BrokerCard = ({ broker }: { broker: Broker }) => {
       <div className="p-4">
         <div className="flex items-center mb-4">
           <div className="w-14 h-14 rounded-full overflow-hidden mr-3">
-            {/* Use the first letter of the name as a placeholder */}
-            <div className="w-full h-full bg-blue-500 text-white flex items-center justify-center text-xl font-semibold">
-              {broker.profileImage ? (
-                <img src={broker.profileImage} alt={broker.name} className="w-full h-full object-cover" />
-              ) : (
-                broker.name.charAt(0).toUpperCase()
-              )}
-            </div>
+            {broker.profileImage ? (
+              <img 
+                src={broker.profileImage} 
+                alt={broker.name} 
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  // If image fails to load, show the first letter
+                  e.currentTarget.style.display = 'none';
+                  e.currentTarget.parentElement!.innerHTML = `
+                    <div class="w-full h-full bg-blue-500 text-white flex items-center justify-center text-xl font-semibold">
+                      ${broker.name.charAt(0).toUpperCase()}
+                    </div>
+                  `;
+                }}
+              />
+            ) : (
+              <div className="w-full h-full bg-blue-500 text-white flex items-center justify-center text-xl font-semibold">
+                {broker.name.charAt(0).toUpperCase()}
+              </div>
+            )}
           </div>
           <div>
             <h3 className="font-bold">{broker.name}</h3>
-            <span className="text-xs py-0.5 px-2 bg-neutral-100 rounded-full">Broker</span>
+            <span className="text-xs py-0.5 px-2 bg-neutral-100 rounded-full">
+              {broker.category || 'Broker'}
+            </span>
           </div>
         </div>
         
@@ -78,7 +121,7 @@ const BrokerCard = ({ broker }: { broker: Broker }) => {
           <div className="flex justify-between text-sm mt-3">
             <div>
               <p className="text-neutral-600">License Number</p>
-              <p className="font-medium">{broker.licenseNumber}</p>
+              <p className="font-medium">{broker.licenseNumber || 'Not specified'}</p>
             </div>
             <div className="flex flex-col gap-2">
               <Button size="sm" variant="outline" onClick={handleContact}>Contact</Button>
@@ -129,7 +172,7 @@ const BrokersSection = () => {
   
         // Assuming the data is an object with a "users" field containing the array of brokers
         if (Array.isArray(data.users)) {
-          const brokerData = data.users.filter((user: Broker) => user.userType === 'broker');
+          const brokerData = data.users.filter((user: Broker) => user.userType === 'broker').slice(0, 4);
           console.log('Filtered Brokers:', brokerData);
   
           // Check if brokerData is not empty and then set the brokers
