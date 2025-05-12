@@ -85,13 +85,31 @@ const AdminPropertiesPage = () => {
     navigate(`/admin/properties/${id}/edit`);
   };
 
-  const handleDelete = (id: string) => {
-    toast({
-      title: "Property deleted",
-      description: "The property has been successfully deleted.",
-    });
-    setProperties(properties.filter((property) => property.id !== id));
+  const handleDelete = async (id: string) => {
+    try {
+      const response = await fetch(`${BASE_URL}/v1/property/deleteProperty/${id}`, {
+        method: "DELETE",
+      });
+  
+      if (!response.ok) {
+        throw new Error("Failed to delete property");
+      }
+  
+      // Update local state only after successful deletion
+      setProperties(properties.filter((property) => property.id !== id));
+      toast({
+        title: "Property deleted",
+        description: "The property has been successfully deleted.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete the property. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
+  
 
   if (loading) return <div>Loading properties...</div>;
   if (error) return <div>{error}</div>;
