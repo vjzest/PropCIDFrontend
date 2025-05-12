@@ -7,28 +7,28 @@ import {
   Phone,
   Mail,
   MapPin,
-  Building2,
   Award,
   Star,
   Calendar,
   Globe,
+  Home,
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
-const ViewBuilder = () => {
+const ViewBroker = () => {
   const { id } = useParams();
-  const [builder, setBuilder] = useState<any>(null);
+  const [broker, setBroker] = useState<any>(null);
 
   useEffect(() => {
-    // Get builder data from localStorage
+    // Get broker data from localStorage
     const profileData = localStorage.getItem("profileData");
     if (profileData) {
-      setBuilder(JSON.parse(profileData));
+      setBroker(JSON.parse(profileData));
     }
   }, [id]);
 
-  if (!builder) {
+  if (!broker) {
     return (
       <>
         <Navbar />
@@ -48,35 +48,35 @@ const ViewBuilder = () => {
       <main className="min-h-screen bg-gray-50 pt-20">
         <div className="container mx-auto px-4 py-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Builder Information Card */}
+            {/* Broker Information Card */}
             <Card className="md:col-span-1">
               <CardHeader>
                 <div className="flex items-center gap-4">
                   <div className="w-14 h-14 rounded-full overflow-hidden mr-3">
-                    {builder.profileImage ? (
+                    {broker.profileImage ? (
                       <img
-                        src={builder.profileImage}
-                        alt={builder.name}
+                        src={broker.profileImage}
+                        alt={broker.name}
                         className="w-full h-full object-cover"
                         onError={(e) => {
                           // If image fails to load, show the first letter
                           e.currentTarget.style.display = "none";
                           e.currentTarget.parentElement!.innerHTML = `
                     <div class="w-full h-full bg-blue-500 text-white flex items-center justify-center text-xl font-semibold">
-                      ${builder.name.charAt(0).toUpperCase()}
+                      ${broker.name.charAt(0).toUpperCase()}
                     </div>
                   `;
                         }}
                       />
                     ) : (
                       <div className="w-full h-full bg-blue-500 text-white flex items-center justify-center text-xl font-semibold">
-                        {builder.name.charAt(0).toUpperCase()}
+                        {broker.name.charAt(0).toUpperCase()}
                       </div>
                     )}
                   </div>
                   <div>
-                    <CardTitle className="text-2xl">{builder.name}</CardTitle>
-                    <Badge className="mt-2">{builder.category}</Badge>
+                    <CardTitle className="text-2xl">{broker.name}</CardTitle>
+                    <Badge className="mt-2">{broker.category}</Badge>
                   </div>
                 </div>
               </CardHeader>
@@ -84,69 +84,67 @@ const ViewBuilder = () => {
                 <div className="space-y-4">
                   <div className="flex items-center gap-2">
                     <Mail className="h-4 w-4 text-gray-500" />
-                    <span>{builder.email}</span>
+                    <span>{broker.email}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Phone className="h-4 w-4 text-gray-500" />
-                    <span>{builder.phone}</span>
+                    <span>{broker.phone}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <MapPin className="h-4 w-4 text-gray-500" />
-                    <span>{builder.location}</span>
+                    <span>{broker.location}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Globe className="h-4 w-4 text-gray-500" />
                     <a
-                      href={`https://${builder.website}`}
+                      href={`https://${broker.website}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-primary hover:underline"
                     >
-                      {builder.website}
+                      {broker.website}
                     </a>
                   </div>
                   <div className="flex items-center gap-2">
                     <Star className="h-4 w-4 text-yellow-500" />
-                    <span>{builder.rating} Rating</span>
+                    <span>{broker.rating} Rating</span>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            {/* Builder Details Card */}
+            {/* Broker Details Card */}
             <Card className="md:col-span-2">
               <CardHeader>
-                <CardTitle>About {builder.name}</CardTitle>
+                <CardTitle>About {broker.name}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-6">
-                  <p className="text-gray-600">{builder.about}</p>
+                  <p className="text-gray-600">{broker.about}</p>
 
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <p className="text-sm text-gray-500">Experience</p>
-                      <p className="font-medium">{builder.experience}</p>
+                      <p className="font-medium">{broker.experience}</p>
                     </div>
                     <div className="space-y-2">
-                      <p className="text-sm text-gray-500">Team Size</p>
-                      <p className="font-medium">{builder.teamSize} Members</p>
+                      <p className="text-sm text-gray-500">Properties Sold</p>
+                      <p className="font-medium">{broker.propertiesSold}</p>
                     </div>
                     <div className="space-y-2">
-                      <p className="text-sm text-gray-500">
-                        Completed Projects
-                      </p>
-                      <p className="font-medium">{builder.completedProjects}</p>
+                      <p className="text-sm text-gray-500">Active Listings</p>
+                      <p className="font-medium">{broker.activeListings}</p>
                     </div>
                     <div className="space-y-2">
-                      <p className="text-sm text-gray-500">Current Projects</p>
-                      <p className="font-medium">{builder.currentProjects}</p>
+                      <p className="text-sm text-gray-500">Total Sales</p>
+                      <p className="font-medium">{broker.totalSales}</p>
                     </div>
                   </div>
 
                   <div className="space-y-2">
                     <h3 className="font-medium">Specialties</h3>
                     <div className="flex flex-wrap gap-2">
-                      {builder.specialties.map(
+                      {broker.specialties?.map(
                         (specialty: string, index: number) => (
                           <Badge key={index} variant="secondary">
                             {specialty}
@@ -159,7 +157,7 @@ const ViewBuilder = () => {
                   <div className="space-y-2">
                     <h3 className="font-medium">Certifications</h3>
                     <div className="flex flex-wrap gap-2">
-                      {builder.certifications.map(
+                      {broker.certifications?.map(
                         (certification: string, index: number) => (
                           <Badge
                             key={index}
@@ -177,15 +175,15 @@ const ViewBuilder = () => {
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <p className="text-sm text-gray-500">
-                        Average Project Size
+                        Average Property Price
                       </p>
-                      <p className="font-medium">
-                        {builder.averageProjectSize}
-                      </p>
+                      <p className="font-medium">{broker.averagePrice}</p>
                     </div>
                     <div className="space-y-2">
-                      <p className="text-sm text-gray-500">Total Value Built</p>
-                      <p className="font-medium">{builder.totalValueBuilt}</p>
+                      <p className="text-sm text-gray-500">Languages</p>
+                      <p className="font-medium">
+                        {broker.languages?.join(", ")}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -199,4 +197,4 @@ const ViewBuilder = () => {
   );
 };
 
-export default ViewBuilder;
+export default ViewBroker;
