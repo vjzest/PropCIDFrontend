@@ -187,7 +187,6 @@ const PropertiesPage = () => {
             Explore our extensive collection of premium properties
           </p>
           
-      
         </div>
 
         {loading ? (
