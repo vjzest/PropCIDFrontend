@@ -21,57 +21,66 @@ const BrokerCard = ({ broker }) => {
   const isAuthenticated = localStorage.getItem("authenticated") === "true";
 
   const handleViewProfile = () => {
-    // Store broker profile data in localStorage for the profile page
+    // Store builder profile data in localStorage for the profile page
     localStorage.setItem(
       "profileData",
       JSON.stringify({
-        type: "broker",
+        type: "builder",
         id: broker.id,
         name: broker.name,
-        image: broker.image,
-        category: broker.category,
-        experience: broker.experience,
-        location: broker.location,
         email: broker.email,
-        phone: broker.phone,
-        website: broker.website,
-        languages: broker.languages,
-        certifications: broker.certifications,
-        about: broker.about,
-        activeListings: broker.activeListings,
-        totalSales: broker.totalSales,
-        averagePrice: broker.averagePrice,
-        specialties: broker.specialties,
-        rating: broker.rating,
+        companyName: broker.companyName || "Not specified",
+        registrationNumber: broker.registrationNumber || "Not specified",
+        createdAt: broker.createdAt,
+        profileImage: broker.profileImage,
+        category: broker.category || "Builder",
+        experience: broker.experience || "Not specified",
+        location: broker.location || "Not specified",
+        phone: broker.phone || "Not specified",
+        website: broker.website || "Not specified",
+        about: broker.about || "No description available",
+        completedProjects: broker.completedProjects || "0",
+        activeProjects: broker.activeProjects || "0",
+        totalRevenue: broker.totalRevenue || "0",
+        specialties: broker.specialties || [],
+        certifications: broker.certifications || [],
+        teamSize: broker.teamSize || "0",
+        awards: broker.awards || []
       })
     );
-    navigate(`/brokers/${broker.id}`);
+    navigate(`/builders/${broker.id}`);
   };
-
-  // If no profile image, show an icon with the first letter of the name
-  const renderProfileImage = broker.image ? (
-    <img
-      src={broker.image}
-      alt={broker.name}
-      className="w-full h-full object-cover"
-    />
-  ) : (
-    <div className="w-12 h-12 rounded-full flex items-center justify-center bg-blue-500 text-white text-xl font-bold">
-      {broker.name.charAt(0)}
-    </div>
-  );
 
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 h-full">
       <div className="p-4">
         <div className="flex items-center mb-3">
           <div className="w-12 h-12 rounded-full overflow-hidden mr-3">
-            {renderProfileImage}
+            {broker.profileImage ? (
+              <img
+                src={broker.profileImage}
+                alt={broker.name}
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  // If image fails to load, show the first letter
+                  e.currentTarget.style.display = "none";
+                  e.currentTarget.parentElement!.innerHTML = `
+                    <div class="w-full h-full bg-blue-500 text-white flex items-center justify-center text-xl font-semibold">
+                      ${broker.name.charAt(0).toUpperCase()}
+                    </div>
+                  `;
+                }}
+              />
+            ) : (
+              <div className="w-full h-full bg-blue-500 text-white flex items-center justify-center text-xl font-semibold">
+                {broker.name.charAt(0).toUpperCase()}
+              </div>
+            )}
           </div>
           <div>
             <h3 className="text-base font-bold">{broker.name}</h3>
             <span className="text-xs py-0.5 px-2 bg-neutral-100 rounded-full">
-              {broker.category}
+              {broker.category || "Builder"}
             </span>
           </div>
         </div>
@@ -79,33 +88,33 @@ const BrokerCard = ({ broker }) => {
         <div className="grid grid-cols-2 gap-2 mb-3">
           <div>
             <p className="text-neutral-600 text-xs">Location</p>
-            <p className="font-medium text-sm">{broker.location}</p>
+            <p className="font-medium text-sm">{broker.location || "Not specified"}</p>
           </div>
           <div>
             <p className="text-neutral-600 text-xs">Experience</p>
-            <p className="font-medium text-sm">{broker.experience}</p>
+            <p className="font-medium text-sm">{broker.experience || "Not specified"}</p>
           </div>
           {isAuthenticated && (
             <>
               <div>
-                <p className="text-neutral-600 text-xs">Properties</p>
-                <p className="font-medium text-sm">{broker.properties}</p>
+                <p className="text-neutral-600 text-xs">Completed Projects</p>
+                <p className="font-medium text-sm">{broker.completedProjects || "0"}</p>
               </div>
               <div>
-                <p className="text-neutral-600 text-xs">Annual Sales</p>
-                <p className="font-medium text-sm">{broker.sales}</p>
+                <p className="text-neutral-600 text-xs">Active Projects</p>
+                <p className="font-medium text-sm">{broker.activeProjects || "0"}</p>
               </div>
               <div className="col-span-2">
                 <p className="text-neutral-600 text-xs">Specialties</p>
                 <p className="font-medium text-sm">
-                  {broker.specialties?.join(", ")}
+                  {broker.specialties?.join(", ") || "Not specified"}
                 </p>
               </div>
             </>
           )}
         </div>
 
-        <div className="flex justify-between mt-3">
+        <div className="flex justify-end">
           <Button
             size="sm"
             variant="outline"
