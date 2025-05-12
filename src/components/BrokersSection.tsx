@@ -91,6 +91,7 @@ const BrokerCard = ({ broker }: { broker: Broker }) => {
               {broker.profileImage ? (
               <img 
                 src={broker.profileImage} 
+                alt={broker.name} 
                 className="w-full h-full object-cover"
                 onError={(e) => {
                   // If image fails to load, show the first letter
