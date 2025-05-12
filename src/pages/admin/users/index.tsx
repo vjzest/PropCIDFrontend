@@ -3,24 +3,37 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Eye, X, Home, Search } from "lucide-react";
 
-// Define the User interface (adding userType)
 interface User {
   _id: string;
   name: string;
   email: string;
-  userType: string; // Add the userType field
+  userType: string;
   companyName?: string;
   isVerified: boolean;
   location?: string;
   specialization?: string;
+  experience?: number;
+  sales?: number;
+  phone?: string;
+  profileImage?: string;
 }
 
 const BASE_URL = "https://propb1.onrender.com";
 
 const AdminusersPage = () => {
-  const [users, setusers] = useState<User[]>([]); // Use User interface
+  const [users, setusers] = useState<User[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [selecteduser, setSelecteduser] = useState<User | null>(null);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -51,121 +64,157 @@ const AdminusersPage = () => {
 
   const filteredusers = users.filter(
     (user) =>
-      user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (user.location || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (user.specialization || "")
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase())
+      user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.companyName?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const handleView = (user: User) => {
+    setSelecteduser(user);
+    setIsViewModalOpen(true);
+  };
+
   return (
-    <div className="min-h-screen bg-neutral-50">
-      <div className="container mx-auto px-4 pt-2">
-        <div className="bg-white shadow-lg rounded-lg overflow-hidden">
-          <div className="bg-primary p-6 text-white">
-            <h1 className="text-2xl font-bold">Manage users</h1>
-            <p className="text-primary-50">
-              View and manage all registered user accounts
-            </p>
-          </div>
-
-          <div className="p-6">
-            <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
-              <div className="w-full md:w-1/3">
-                <Input
-                  placeholder="Search users..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full"
-                />
-              </div>
-              <div className="flex gap-2">
-                <Button className="bg-primary hover:bg-primary/90">
-                  Add New user
-                </Button>
-              </div>
-            </div>
-
-            <div className="overflow-x-auto">
-              <table className="w-full border-collapse">
-                <thead>
-                  <tr className="bg-gray-50 text-left">
-                    <th className="px-4 py-3 text-sm font-medium text-gray-600">
-                      user Name
-                    </th>
-                    <th className="px-4 py-3 text-sm font-medium text-gray-600">
-                      Email
-                    </th>
-                    <th className="px-4 py-3 text-sm font-medium text-gray-600">
-                      Company
-                    </th>
-                    <th className="px-4 py-3 text-sm font-medium text-gray-600">
-                      Status
-                    </th>
-                    <th className="px-4 py-3 text-sm font-medium text-gray-600">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y">
-                  {filteredusers.map((user) => (
-                    <tr key={user._id}>
-                      <td className="px-4 py-4">{user.name}</td>
-                      <td className="px-4 py-4">{user.email}</td>
-                      <td className="px-4 py-4">{user.companyName || "-"}</td>
-                      <td className="px-4 py-4">
-                        <span
-                          className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
-                            user.isVerified
-                              ? "bg-green-100 text-green-800"
-                              : "bg-yellow-100 text-yellow-800"
-                          }`}
-                        >
-                          {user.isVerified ? "Verified" : "Pending"}
-                        </span>
-                      </td>
-                      <td className="px-4 py-4">
-                        <div className="flex space-x-2">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() =>
-                              navigate(`/admin/users/${user._id}/view`)
-                            }
-                          >
-                            View
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="text-primary border-primary"
-                            onClick={() =>
-                              navigate(`/admin/users/${user._id}/edit`)
-                            }
-                          >
-                            Edit
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                  {filteredusers.length === 0 && (
-                    <tr>
-                      <td
-                        colSpan={5}
-                        className="px-4 py-6 text-center text-gray-500"
-                      >
-                        No users found matching your search.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-bold flex items-center gap-2">
+          <Home className="w-6 h-6" />
+          users
+        </h1>
       </div>
+
+      <div className="relative w-full md:w-1/3">
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+        <Input
+          placeholder="Search users..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="pl-10"
+        />
+      </div>
+
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Name</TableHead>
+              <TableHead>Email</TableHead>
+              <TableHead>Company</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Action</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filteredusers.map((user) => (
+              <TableRow key={user._id}>
+                <TableCell>{user.name}</TableCell>
+                <TableCell>{user.email}</TableCell>
+                <TableCell>{user.companyName || "N/A"}</TableCell>
+                <TableCell>
+                  {user.isVerified ? (
+                    <span className="text-green-600">Verified</span>
+                  ) : (
+                    <span className="text-red-600">Unverified</span>
+                  )}
+                </TableCell>
+                <TableCell>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleView(user)}
+                    className="text-blue-500 hover:text-blue-700"
+                  >
+                    <Eye className="w-4 h-4 mr-1" />
+                    View
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+
+      {filteredusers.length === 0 && (
+        <div className="text-center py-10 text-muted-foreground">
+          No users found
+        </div>
+      )}
+
+      {/* user Details Modal */}
+      <Dialog open={isViewModalOpen} onOpenChange={setIsViewModalOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex justify-between items-center">
+              <span>user Details</span>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsViewModalOpen(false)}
+                className="h-8 w-8 p-0"
+              >
+                {/* <X className="h-4 w-4" /> */}
+              </Button>
+            </DialogTitle>
+          </DialogHeader>
+          {selecteduser && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+              <div className="space-y-4">
+              {selecteduser.profileImage ? (
+  <img
+    src={selecteduser.profileImage}
+    alt={selecteduser.name}
+    className="w-full h-48 object-cover rounded-md"
+  />
+) : (
+  <div className="w-full h-48 flex items-center justify-center bg-gray-200 rounded-md text-4xl font-bold text-gray-600">
+    {selecteduser.name?.charAt(0).toUpperCase() || "B"}
+  </div>
+)}
+              </div>
+              <div className="space-y-2">
+                <div>
+                  <p className="text-sm text-gray-500">Name</p>
+                  <p className="font-medium">{selecteduser.name}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Email</p>
+                  <p className="font-medium">{selecteduser.email}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Company</p>
+                  <p className="font-medium">{selecteduser.companyName || "N/A"}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Phone</p>
+                  <p className="font-medium">{selecteduser.phone || "N/A"}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Location</p>
+                  <p className="font-medium">{selecteduser.location || "N/A"}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Specialization</p>
+                  <p className="font-medium">{selecteduser.specialization || "N/A"}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Experience</p>
+                  <p className="font-medium">{selecteduser.experience || 0} yrs</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Sales</p>
+                  <p className="font-medium">{selecteduser.sales || 0}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Status</p>
+                  <p className="font-medium">
+                    {selecteduser.isVerified ? "Verified" : "Unverified"}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
