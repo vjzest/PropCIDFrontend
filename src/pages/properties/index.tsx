@@ -7,7 +7,7 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-const BASE_URL = "https://propb1.onrender.com";
+const BASE_URL = "https://propb1.onrender.co";
 
 const PropertyCard = ({ property }: { property: any }) => {
   const [showDialog, setShowDialog] = useState(false);
