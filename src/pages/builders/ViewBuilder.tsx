@@ -1,11 +1,20 @@
-import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Phone, Mail, MapPin, Building2, Award, Star, Calendar, Globe } from 'lucide-react';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Phone,
+  Mail,
+  MapPin,
+  Building2,
+  Award,
+  Star,
+  Calendar,
+  Globe,
+} from "lucide-react";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 
 const ViewBuilder = () => {
   const { id } = useParams();
@@ -13,7 +22,7 @@ const ViewBuilder = () => {
 
   useEffect(() => {
     // Get builder data from localStorage
-    const profileData = localStorage.getItem('profileData');
+    const profileData = localStorage.getItem("profileData");
     if (profileData) {
       setBuilder(JSON.parse(profileData));
     }
@@ -43,12 +52,27 @@ const ViewBuilder = () => {
             <Card className="md:col-span-1">
               <CardHeader>
                 <div className="flex items-center gap-4">
-                  <div className="w-20 h-20 rounded-full overflow-hidden">
-                    <img 
-                      src={builder.image} 
-                      alt={builder.name} 
-                      className="w-full h-full object-cover"
-                    />
+                  <div className="w-14 h-14 rounded-full overflow-hidden mr-3">
+                    {builder.profileImage ? (
+                      <img
+                        src={builder.profileImage}
+                        alt={builder.name}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          // If image fails to load, show the first letter
+                          e.currentTarget.style.display = "none";
+                          e.currentTarget.parentElement!.innerHTML = `
+                    <div class="w-full h-full bg-blue-500 text-white flex items-center justify-center text-xl font-semibold">
+                      ${builder.name.charAt(0).toUpperCase()}
+                    </div>
+                  `;
+                        }}
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-blue-500 text-white flex items-center justify-center text-xl font-semibold">
+                        {builder.name.charAt(0).toUpperCase()}
+                      </div>
+                    )}
                   </div>
                   <div>
                     <CardTitle className="text-2xl">{builder.name}</CardTitle>
@@ -72,7 +96,12 @@ const ViewBuilder = () => {
                   </div>
                   <div className="flex items-center gap-2">
                     <Globe className="h-4 w-4 text-gray-500" />
-                    <a href={`https://${builder.website}`} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                    <a
+                      href={`https://${builder.website}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary hover:underline"
+                    >
                       {builder.website}
                     </a>
                   </div>
@@ -92,7 +121,7 @@ const ViewBuilder = () => {
               <CardContent>
                 <div className="space-y-6">
                   <p className="text-gray-600">{builder.about}</p>
-                  
+
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <p className="text-sm text-gray-500">Experience</p>
@@ -103,7 +132,9 @@ const ViewBuilder = () => {
                       <p className="font-medium">{builder.teamSize} Members</p>
                     </div>
                     <div className="space-y-2">
-                      <p className="text-sm text-gray-500">Completed Projects</p>
+                      <p className="text-sm text-gray-500">
+                        Completed Projects
+                      </p>
                       <p className="font-medium">{builder.completedProjects}</p>
                     </div>
                     <div className="space-y-2">
@@ -115,28 +146,42 @@ const ViewBuilder = () => {
                   <div className="space-y-2">
                     <h3 className="font-medium">Specialties</h3>
                     <div className="flex flex-wrap gap-2">
-                      {builder.specialties.map((specialty: string, index: number) => (
-                        <Badge key={index} variant="secondary">{specialty}</Badge>
-                      ))}
+                      {builder.specialties.map(
+                        (specialty: string, index: number) => (
+                          <Badge key={index} variant="secondary">
+                            {specialty}
+                          </Badge>
+                        )
+                      )}
                     </div>
                   </div>
 
                   <div className="space-y-2">
                     <h3 className="font-medium">Certifications</h3>
                     <div className="flex flex-wrap gap-2">
-                      {builder.certifications.map((certification: string, index: number) => (
-                        <Badge key={index} variant="outline" className="flex items-center gap-1">
-                          <Award className="h-3 w-3" />
-                          {certification}
-                        </Badge>
-                      ))}
+                      {builder.certifications.map(
+                        (certification: string, index: number) => (
+                          <Badge
+                            key={index}
+                            variant="outline"
+                            className="flex items-center gap-1"
+                          >
+                            <Award className="h-3 w-3" />
+                            {certification}
+                          </Badge>
+                        )
+                      )}
                     </div>
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <p className="text-sm text-gray-500">Average Project Size</p>
-                      <p className="font-medium">{builder.averageProjectSize}</p>
+                      <p className="text-sm text-gray-500">
+                        Average Project Size
+                      </p>
+                      <p className="font-medium">
+                        {builder.averageProjectSize}
+                      </p>
                     </div>
                     <div className="space-y-2">
                       <p className="text-sm text-gray-500">Total Value Built</p>
@@ -154,4 +199,4 @@ const ViewBuilder = () => {
   );
 };
 
-export default ViewBuilder; 
+export default ViewBuilder;
