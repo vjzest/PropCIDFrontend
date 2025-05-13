@@ -163,7 +163,7 @@ const BuilderProfile = () => {
                 className="flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 text-sm"
               >
                 <Trash2 className="w-4 h-4" />
-                Delete
+                Delete Account
               </button>
             </div>
           </div>
