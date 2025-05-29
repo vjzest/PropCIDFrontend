@@ -23,7 +23,7 @@ const ReelItem = ({ reel }: { reel: Reel }) => {
   const [isMuted, setIsMuted] = useState(false);
 
   return (
-    <div className="reel-item relative bg-black rounded-xl overflow-hidden shadow-lg h-80 flex flex-col">
+    <div className="reel-item relative bg-black rounded-xl overflow-hidden shadow-lg h-74 w-full flex flex-col" style={{ minWidth: '0' }}>
       <div className="relative h-2/3 w-full cursor-pointer" onClick={() => {
         if (videoRef.current) {
           isPlaying ? videoRef.current.pause() : videoRef.current.play();
@@ -110,55 +110,64 @@ const Reels = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchReels = async () => {
-      try {
-        const res = await fetch(`${BASE_URL}/v1/property/getProperties`);
-        const json = await res.json();
-
-        if (json.status !== "success" || !json.data)
-          throw new Error("Invalid response");
-
-        const fetched = json.data
-          .map((item: any) => ({
-            id: item.id,
-            videoUrl: item.videos?.[0] || "",
-            profileImage: item.images?.[0] || "/images/default.png",
-            owner: item.owner || "Unknown",
-            location: item.location || "Unknown",
-            price: item.rate || "N/A",
-            description: item.title || "",
-            likes: item.likes || 0,
-            comments: item.comments || 0,
-          }))
-          .filter((r: Reel) => r.videoUrl);
-
-        setReels(fetched);
-      } catch (err: any) {
-        console.error(err);
-        setError(err.message || "Failed to load reels");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchReels();
+    // Mock data for reels
+    const mockReels: Reel[] = [
+      {
+        id: "1",
+        videoUrl: "/videos/sample1.mp4",
+        profileImage: "/images/profile1.png",
+        owner: "Amit Sharma",
+        location: "Delhi, India",
+        price: "1,20,00,000",
+        description: "Spacious 3BHK in the heart of Delhi with modern amenities.",
+        likes: 120,
+        comments: 15,
+      },
+      {
+        id: "2",
+        videoUrl: "/videos/sample2.mp4",
+        profileImage: "/images/profile2.png",
+        owner: "Priya Singh",
+        location: "Mumbai, India",
+        price: "2,50,00,000",
+        description: "Luxurious sea-facing apartment in Mumbai.",
+        likes: 98,
+        comments: 22,
+      },
+      {
+        id: "3",
+        videoUrl: "/videos/sample3.mp4",
+        profileImage: "/images/profile3.png",
+        owner: "Rahul Verma",
+        location: "Bangalore, India",
+        price: "90,00,000",
+        description: "Cozy 2BHK in a peaceful Bangalore neighborhood.",
+        likes: 76,
+        comments: 8,
+      },
+      // Add more mock reels as needed
+    ];
+    setTimeout(() => {
+      setReels(mockReels);
+      setLoading(false);
+    }, 1000); // Simulate loading
   }, []);
 
   if (loading)
     return (
-      <div className="h-screen flex items-center justify-center text-white bg-black">
+      <div className="h-screen flex items-center justify-center text-black bg-neutral-50">
         Loading reels...
       </div>
     );
   if (error)
     return (
-      <div className="h-screen flex items-center justify-center text-red-500 bg-black">
+      <div className="h-screen flex items-center justify-center text-red-500 bg-neutral-50">
         {error}
       </div>
     );
 
   return (
-    <div className="relative min-h-screen bg-black pb-8">
+    <div className="relative min-h-screen bg-neutral-50 pb-8 overflow-auto">
       {/* Back Button */}
       <button
         onClick={() => navigate(-1)}
@@ -167,9 +176,11 @@ const Reels = () => {
         <ArrowLeft className="h-6 w-6" />
       </button>
 
-      <div className="max-w-5xl mx-auto pt-20 px-2 grid grid-cols-2 md:grid-cols-3 gap-4">
-        {reels.map((reel) => (
-          <ReelItem key={reel.id} reel={reel} />
+      <div className="max-w-sm mx-auto pt-20 px-2 flex flex-col gap-4" style={{ width: '350px' }}>
+        {reels.map((reel, idx) => (
+          <div key={reel.id} style={{ marginBottom: (idx + 1) % 3 === 0 ? '2rem' : '1rem' }}>
+            <ReelItem reel={reel} />
+          </div>
         ))}
       </div>
     </div>
