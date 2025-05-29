@@ -1,62 +1,38 @@
-import { useRef, useEffect } from 'react';
-import Navbar from '@/components/Navbar';
-import Stories from '@/components/Stories';
-import Reels from '@/components/Reels';
-import PropertyFeed from '@/components/PropertyFeed';
-import BuildersSection from '@/components/BuildersSection';
-import BrokersSection from '@/components/BrokersSection';
-import PromotionalBanner from '@/components/PromotionalBanner';
-import DocumentUpload from '@/components/DocumentUpload';
+import Header from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import Reels from '@/components/home/reel-section';
+import Stories from '@/components/home/stories-section';
+import PropertyFeed from '@/components/home/property-section';
+import BuildersSection from '@/components/home/builder-section';
+import PromotionalBanner from '@/components/PromotionalBanner';
+import ProfileSection from '@/components/home/profile-section';
+import NetworkSection from '@/components/home/network-section';
 
 const Index = () => {
-  const mainContentRef = useRef<HTMLDivElement>(null);
-  
-  useEffect(() => {
-    // Adjust padding for fixed navbar
-    const navbarHeight = document.querySelector('nav')?.offsetHeight || 0;
-    if (mainContentRef.current) {
-      mainContentRef.current.style.paddingTop = `${navbarHeight}px`;
-    }
-  }, []);
-  
   return (
-    <div className="min-h-screen bg-neutral-50 flex flex-col lg:flex-row">
-      {/* Left Column: Navigation, scrollable content, and footer */}
-      <div className="w-full lg:w-[70%] flex flex-col relative z-10">
-        <div className="w-[70%] mx-auto">
-          <Navbar />
-        </div>
-        
-        <div className="pt-14 flex-1">
-          {/* Stories section - only on the left side */}
-          <div className="container mx-auto px-4">
-            <Stories />
+    <div>
+      <Header />
+      <div className="mx-auto px-4 mt-6">
+        <div className="flex gap-8">
+          {/* Left Sidebar */}
+          <div className="hidden lg:flex flex-col gap-4 w-[22%] min-w-[250px] max-w-xs sticky top-24 h-[calc(100vh-6rem)] overflow-y-auto hide-scrollbar z-30">
+            <ProfileSection />
+            <NetworkSection />
           </div>
-          
-          {/* Main scrollable content */}
-          <div 
-            ref={mainContentRef}
-            className="container mx-auto px-4 py-8"
-          >
+          {/* Center Content */}
+          <div className="flex-1 min-w-0 py-12">
+            <Stories />
             <PropertyFeed />
             <BuildersSection />
-            <BrokersSection />
             <PromotionalBanner />
-            <DocumentUpload />
+          </div>
+          {/* Right Sidebar */}
+          <div className="hidden lg:block w-[25%] max-w-sm sticky top-0 h-[calc(100vh-2rem)] overflow-y-auto hide-scrollbar z-30">
+            <Reels />
           </div>
         </div>
-        
-        {/* Footer - only on the left side */}
-        <div className="relative z-10">
-          <Footer />
-        </div>
       </div>
-      
-      {/* Right Column: Fixed reels panel (covers entire right side) - Only visible on desktop */}
-      <div className="hidden lg:block lg:w-[30%] h-screen fixed right-0 top-0 z-0">
-        <Reels />
-      </div>
+      <Footer />
     </div>
   );
 };

@@ -60,7 +60,7 @@ import ViewEnquiryPage from '@/pages/admin/enquiries/view';
 import EditPropertyPage from '@/pages/admin/properties/edit';
 import BrokerPropertiesPage from '@/pages/admin/brokers/properties';
 import { AuthProvider } from './context/AuthContext';
-import AppRoutes from './routes';
+
 
 const queryClient = new QueryClient();
 

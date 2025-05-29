@@ -15,17 +15,17 @@ const PromotionalBanner = () => {
         }}
       ></div>
       
-      <div className="relative z-10 p-8 md:p-12 text-white">
+      <div className="relative z-10 p-8 md:p-12 text-black">
         <div className="max-w-2xl">
           <h2 className="text-2xl md:text-3xl font-bold mb-4">Find Your Dream Property Today</h2>
-          <p className="mb-6 text-white/90">
+          <p className="mb-6 text-black/90">
             Join thousands of satisfied customers who found their perfect home through PropCID. 
             Our advanced property matching system helps you find exactly what you're looking for.
           </p>
           
           <div className="flex flex-wrap gap-4">
-            <Button className="bg-white text-primary hover:bg-neutral-100">Get Started</Button>
-            <Button variant="outline" className="border-white text-white hover:bg-white/10">Learn More</Button>
+            <Button className="bg-black text-white hover:text-black hover:bg-neutral-100">Get Started</Button>
+            <Button variant="outline" className="border-black text-black hover:bg-white/10">Learn More</Button>
           </div>
         </div>
       </div>
