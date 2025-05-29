@@ -42,7 +42,7 @@ interface Property {
   images: string[];
   videos: string[];
 }
-const BASE_URL='https://propcidback.onrender.com'
+const BASE_URL = "https://propb1.onrender.com";
 
 const BuilderMyProperties = () => {
   const { toast } = useToast();

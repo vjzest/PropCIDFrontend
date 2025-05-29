@@ -18,7 +18,7 @@ interface AuthContextType {
   logout: () => Promise<void>;
 }
 
-const BASE_URL = "https://propcidback.onrender.com"; // Your backend URL
+const BASE_URL = "https://propb1.onrender.com"; // Your backend URL
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 

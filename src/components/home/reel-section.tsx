@@ -21,15 +21,26 @@ const ReelItem = ({ reel }: { reel: Reel }) => {
   const [subscribed, setSubscribed] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
-
   return (
-    <div className="reel-item relative bg-black rounded-xl overflow-hidden shadow-lg h-74 w-full flex flex-col" style={{ minWidth: '0' }}>
-      <div className="relative h-2/3 w-full cursor-pointer" onClick={() => {
-        if (videoRef.current) {
-          isPlaying ? videoRef.current.pause() : videoRef.current.play();
-          setIsPlaying(!isPlaying);
-        }
-      }}>
+    <div
+      className="reel-item relative bg-black rounded-xl overflow-hidden shadow-lg h-74 w-full flex flex-col"
+      style={{ minWidth: "0" }}
+    >
+      <div
+        className="relative h-2/3 w-full cursor-pointer"
+        onClick={() => {
+          if (videoRef.current) {
+            if (isPlaying) {
+              videoRef.current.pause();
+            } else {
+              videoRef.current
+                .play()
+                .catch((error) => console.error("Error playing video:", error));
+            }
+            setIsPlaying(!isPlaying);
+          }
+        }}
+      >
         <video
           ref={videoRef}
           className="h-full w-full object-cover"
@@ -55,47 +66,75 @@ const ReelItem = ({ reel }: { reel: Reel }) => {
             </div>
           </div>
         )}
-        {/* Mute/Unmute on double click */}
+        {/* Mute/Unmute button */}
         <button
-          className="absolute top-2 right-2 bg-black/60 rounded-full p-1 text-white text-xs"
-          onClick={e => {
-            e.stopPropagation();
+          className="absolute top-2 right-2 bg-black/60 rounded-full p-1 text-white text-xs z-10" // Added z-10
+          onClick={(e) => {
+            e.stopPropagation(); // Prevent video play/pause on button click
             if (videoRef.current) {
               videoRef.current.muted = !isMuted;
               setIsMuted(!isMuted);
             }
           }}
         >
-          {isMuted ? '🔇' : '🔊'}
+          {isMuted ? "🔇" : "🔊"}
         </button>
       </div>
       {/* Info and Controls */}
       <div className="flex-1 flex flex-col justify-between p-3">
         <div className="flex items-center gap-3">
           <img
-            src={reel.profileImage}
-            alt="owner"
-            className="w-8 h-8 rounded-full border-2 border-white"
+            src={reel.profileImage || "/images/default-profile.png"} 
+            alt={reel.owner}
+            className="w-8 h-8 rounded-full border-2 border-white object-cover" 
+            onError={(e) =>
+              (e.currentTarget.src = "/images/default-profile.png")
+            } // Fallback if image fails to load
           />
-          <div className="flex-1">
-            <p className="font-bold text-white text-sm truncate">{reel.owner}</p>
+          <div className="flex-1 min-w-0">
+            {" "}
+            {/* Added min-w-0 for better truncation */}
+            <p className="font-bold text-white text-sm truncate">
+              {reel.owner}
+            </p>
             <p className="text-xs text-white/80 truncate">{reel.location}</p>
           </div>
-          <span className="text-yellow-400 font-semibold text-sm">₹ {reel.price}</span>
+          <span className="text-yellow-400 font-semibold text-sm whitespace-nowrap">
+            ₹ {reel.price}
+          </span>{" "}
+          {/* Added whitespace-nowrap */}
         </div>
-        <p className="text-xs text-white/90 mt-1 line-clamp-2">{reel.description}</p>
+        <p className="text-xs text-white/90 mt-1 line-clamp-2">
+          {reel.description}
+        </p>
         <div className="flex items-center justify-between mt-2">
-          <button onClick={() => setLiked(!liked)} className="flex items-center gap-1 text-white text-xs">
-            <span className={`text-lg ${liked ? 'text-green-400' : ''}`}>❤️</span> {liked ? reel.likes + 1 : reel.likes}
+          <button
+            onClick={() => setLiked(!liked)}
+            className="flex items-center gap-1 text-white text-xs"
+          >
+            <span className={`text-lg ${liked ? "text-green-400" : ""}`}>
+              ❤️
+            </span>{" "}
+            {liked ? reel.likes + 1 : reel.likes}
           </button>
-          <button onClick={() => alert('Comment feature coming soon.')} className="flex items-center gap-1 text-white text-xs">
+          <button
+            onClick={() => alert("Comment feature coming soon.")}
+            className="flex items-center gap-1 text-white text-xs"
+          >
             💬 {reel.comments}
           </button>
-          <button onClick={() => alert('Share feature coming soon.')} className="flex items-center gap-1 text-white text-xs">
+          <button
+            onClick={() => alert("Share feature coming soon.")}
+            className="flex items-center gap-1 text-white text-xs"
+          >
             📤 Share
           </button>
-          <button onClick={() => setSubscribed(!subscribed)} className="flex items-center gap-1 text-white text-xs">
-            <span className={subscribed ? 'text-green-400' : ''}>🛎️</span> {subscribed ? 'Subscribed' : 'Subscribe'}
+          <button
+            onClick={() => setSubscribed(!subscribed)}
+            className="flex items-center gap-1 text-white text-xs"
+          >
+            <span className={subscribed ? "text-green-400" : ""}>🛎️</span>{" "}
+            {subscribed ? "Subscribed" : "Subscribe"}
           </button>
         </div>
       </div>
@@ -110,48 +149,56 @@ const Reels = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Mock data for reels
-    const mockReels: Reel[] = [
-      {
-        id: "1",
-        videoUrl: "/videos/sample1.mp4",
-        profileImage: "/images/profile1.png",
-        owner: "Amit Sharma",
-        location: "Delhi, India",
-        price: "1,20,00,000",
-        description: "Spacious 3BHK in the heart of Delhi with modern amenities.",
-        likes: 120,
-        comments: 15,
-      },
-      {
-        id: "2",
-        videoUrl: "/videos/sample2.mp4",
-        profileImage: "/images/profile2.png",
-        owner: "Priya Singh",
-        location: "Mumbai, India",
-        price: "2,50,00,000",
-        description: "Luxurious sea-facing apartment in Mumbai.",
-        likes: 98,
-        comments: 22,
-      },
-      {
-        id: "3",
-        videoUrl: "/videos/sample3.mp4",
-        profileImage: "/images/profile3.png",
-        owner: "Rahul Verma",
-        location: "Bangalore, India",
-        price: "90,00,000",
-        description: "Cozy 2BHK in a peaceful Bangalore neighborhood.",
-        likes: 76,
-        comments: 8,
-      },
-      // Add more mock reels as needed
-    ];
-    setTimeout(() => {
-      setReels(mockReels);
-      setLoading(false);
-    }, 1000); // Simulate loading
-  }, []);
+    const fetchReelsData = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const res = await fetch(`${BASE_URL}/v1/property/getProperties`);
+        if (!res.ok) {
+          throw new Error(`Failed to fetch: ${res.status} ${res.statusText}`);
+        }
+        const json = await res.json();
+
+        if (
+          json.status !== "success" ||
+          !json.data ||
+          !Array.isArray(json.data)
+        ) {
+          console.error("Invalid API response structure:", json);
+          throw new Error("Invalid data format from API");
+        }
+
+        const fetchedReels: Reel[] = json.data
+          .map((item: any) => ({
+            id: String(item.id || Date.now() + Math.random()), 
+            videoUrl: item.videos?.[0] || null,
+            profileImage: item.images?.[0] || "/images/default-profile.png", 
+            owner: item.owner?.name || item.owner || "Unknown Owner",             location: item.location || "Unknown Location",
+            price: String(item.rate || "N/A"),
+            description: item.title || "No description available.", 
+            likes: Number(item.likes || 0), 
+            comments: Number(item.comments || 0), 
+          }))
+          .filter((reel: Reel) => reel.videoUrl); 
+
+        if (fetchedReels.length === 0) {
+          console.warn(
+            "No valid reels found after fetching and filtering. API might be empty or data incorrect."
+          );
+        }
+        setReels(fetchedReels);
+      } catch (err: any) {
+        console.error("Error fetching reels:", err);
+        setError(
+          err.message || "Failed to load reels. Please try again later."
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchReelsData();
+  }, []); 
 
   if (loading)
     return (
@@ -161,8 +208,15 @@ const Reels = () => {
     );
   if (error)
     return (
-      <div className="h-screen flex items-center justify-center text-red-500 bg-neutral-50">
-        {error}
+      <div className="h-screen flex flex-col items-center justify-center text-red-500 bg-neutral-50 p-4 text-center">
+        <p>Error loading reels:</p>
+        <p className="text-sm">{error}</p>
+        <button
+          onClick={() => window.location.reload()}
+          className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+        >
+          Try Again
+        </button>
       </div>
     );
 
@@ -176,12 +230,24 @@ const Reels = () => {
         <ArrowLeft className="h-6 w-6" />
       </button>
 
-      <div className="max-w-sm mx-auto pt-20 px-2 flex flex-col gap-4" style={{ width: '350px' }}>
-        {reels.map((reel, idx) => (
-          <div key={reel.id} style={{ marginBottom: (idx + 1) % 3 === 0 ? '2rem' : '1rem' }}>
-            <ReelItem reel={reel} />
-          </div>
-        ))}
+      <div
+        className="max-w-sm mx-auto pt-20 px-2 flex flex-col gap-4"
+        style={{ width: "350px" }}
+      >
+        {reels.length > 0
+          ? reels.map((reel, idx) => (
+              <div
+                key={reel.id}
+                style={{ marginBottom: (idx + 1) % 3 === 0 ? "2rem" : "1rem" }}
+              >
+                <ReelItem reel={reel} />
+              </div>
+            ))
+          : !loading && (
+              <div className="text-center text-gray-500 mt-10">
+                No reels to display.
+              </div>
+            )}
       </div>
     </div>
   );
